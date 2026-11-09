@@ -58,7 +58,7 @@ function isRealKnifeGlove(x){
 }
 function storefrontItemVisible(x){
  // Unmarketable present palette: never list it, even without pricing data.
- if(/palette\\s+of\\s+presents/i.test(String(x.name||"")+" "+String(x.market_hash_name||"")))return false;
+ if(/palette\s+of\s+presents/i.test(String(x.name||"")+" "+String(x.market_hash_name||"")))return false;
  // Minimum sale price applies to every category except gifts/collectibles below.
  // Items without a verified price remain under consultation, not assumed cheap.
  if(priceMap&&fxCnyBrl>0&&!["Chaveiros","Caixas e cápsulas","Patches","Pins","Kits de música","Agentes"].includes(x._category)){
@@ -67,8 +67,9 @@ function storefrontItemVisible(x){
  }
  // Passes bundled with souvenir tokens cannot be sold as individual catalog offers.
  const passName=String(x.name||"")+" "+String(x.market_hash_name||"");
- if(/\\b(?:viewer|tournament|major|event|operation)\\s+pass\\b/i.test(passName)&&/\\b(?:token|tokens)\\b/i.test(passName))return false;
- if(/\\bpass\\b/i.test(passName)&&/\\b\\d+\\s*(?:souvenir\\s*)?tokens?\\b/i.test(passName))return false;
+ if(/\b(?:viewer|tournament|major|event|operation)\s+pass\b/i.test(passName)&&/\b(?:token|tokens)\b/i.test(passName))return false;
+ if(/\bpass\b/i.test(passName)&&/\b\d+\s*(?:souvenir\s*)?tokens?\b/i.test(passName))return false;
+ if(/\bpass\b/i.test(passName)&&/\b(?:tokens?|fichas?)\b/i.test(passName))return false;
  if(!isRealKnifeGlove(x))return false;
  // Hide Souvenir variants only when pricing data is loaded and no valid BRL price exists.
  // A newly priced Souvenir automatically reappears after the next refresh.
