@@ -1,0 +1,22 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Importador YouPin — Salamito Skins</title><style>body{font:15px system-ui;background:#0a1120;color:#eaf2ff;max-width:1000px;margin:35px auto;padding:0 20px}h1{font-size:27px}p,small{color:#adbed8;line-height:1.5}section{background:#13213a;border:1px solid #2b466b;border-radius:15px;padding:20px;margin:18px 0}input,button{font:inherit}input{margin:12px 0}button{background:#428aff;border:0;color:white;padding:12px 16px;border-radius:9px;cursor:pointer}button:disabled{opacity:.45;cursor:default}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;border-bottom:1px solid #304563;padding:10px 5px}th{color:#afc5e6}.scroll{overflow-x:auto}.warning{color:#ffd18b}</style></head><body><h1>Importador YouPin · Salamito Skins</h1><p>Ferramenta local para converter respostas JSON capturadas por você no navegador. Não faz login, não consulta a YouPin, não envia arquivos a servidores e não confirma disponibilidade atual.</p><section><label for="file"><strong>Selecione um arquivo JSON de resposta da YouPin</strong></label><p><input id="file" type="file" accept=".json,application/json"></p><p id="msg">Aguardando arquivo.</p><button id="download" disabled>Baixar JSON normalizado</button></section><section><h2>Prévia dos anúncios capturados</h2><p class="warning">Captura histórica, não equivale a anúncios ativos. Preços originais em CNY. Links individuais não foram confirmados.</p><div class="scroll"><table><thead><tr><th>ID</th><th>Item</th><th>Preço CNY</th><th>Float</th><th>Pattern</th><th>Imagem</th><th>Inspect</th></tr></thead><tbody id="rows"><tr><td colspan="7">Nenhum arquivo carregado.</td></tr></tbody></table></div></section><script>
+const $=id=>document.getElementById(id);let output=null;
+const safe=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const validImg=s=>{try{let u=new URL(s);return u.protocol==="https:"&&/^(?:[a-z0-9-]+\.)*(?:img898\.com|youpinimg\.com)$/i.test(u.hostname)?u.href:null}catch{return null}};
+$("file").addEventListener("change",async e=>{output=null;$("download").disabled=true;$("rows").innerHTML="";try{
+const file=e.target.files[0];if(!file)return;
+if(file.size>15*1024*1024)throw Error("Arquivo acima de 15 MB.");
+const j=JSON.parse(await file.text());if(j.Code!==0||!Array.isArray(j.Data))throw Error("Não é uma resposta YouPin reconhecida (Code 0 + Data array).");
+const now=new Date().toISOString(),items=j.Data.filter(x=>x&&x.gameId===730&&x.id&&x.commodityHashName&&Number.isFinite(Number(x.price))&&Number(x.price)>0).map(x=>({
+listing_id:String(x.id),market_hash_name:String(x.commodityHashName),price_cny:Number(x.price),float_value:x.abrade==null?null:String(x.abrade),paint_seed:Number.isInteger(x.paintSeed)?x.paintSeed:null,
+image_url:validImg(x.secondDFrontImage)||validImg(x.transPic)||validImg(x.iconUrlLarge)||validImg(x.iconUrl),
+image_type:validImg(x.secondDFrontImage)||validImg(x.transPic)?"listing_image":"generic_item_icon",
+inspect_link:typeof x.actions==="string"&&x.actions.startsWith("steam://run/730/")?x.actions:null,
+status:"snapshot_unverified_current",youpin_url:null
+}));
+output={schema_version:1,source:"YouPin browser response supplied by user",snapshot_only:true,captured_at:now,reported_total_count:Number(j.TotalCount)||null,has_next:Boolean(j.HasNext),listings:items};
+$("msg").textContent=items.length+" anúncios convertidos; total reportado pela YouPin: "+(j.TotalCount??"não informado")+". Nenhum anúncio marcado como disponível.";
+$("rows").innerHTML=items.map(x=>'<tr><td>'+safe(x.listing_id)+'</td><td>'+safe(x.market_hash_name)+'</td><td>¥'+safe(x.price_cny.toFixed(2))+'</td><td>'+safe(x.float_value??"—")+'</td><td>'+safe(x.paint_seed??"—")+'</td><td>'+safe(x.image_type)+'</td><td>'+(x.inspect_link?"Sim":"Não")+'</td></tr>').join("")||'<tr><td colspan="7">Sem registros válidos.</td></tr>';
+$("download").disabled=!items.length;
+}catch(err){$("msg").textContent="Erro: "+err.message;$("rows").innerHTML='<tr><td colspan="7">Não foi possível processar.</td></tr>';}});
+$("download").addEventListener("click",()=>{if(!output)return;const b=new Blob([JSON.stringify(output,null,2)],{type:"application/json"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="youpin-listings-normalizado.json";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)});
+</script></body></html>
