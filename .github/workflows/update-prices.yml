@@ -20,11 +20,14 @@ jobs:
         env:
           WISE_API_TOKEN: ${{ secrets.WISE_API_TOKEN }}
         run: python scripts/update_fx.py
-      - name: Auditar itens sem preço\n        run: python scripts/audit_price_coverage.py || echo 'Auditoria indisponível; preços preservados'\n      - name: Publicar somente quando houver dados válidos
+      - name: Auditar itens sem preço
+        run: python scripts/audit_price_coverage.py || echo 'Auditoria indisponível; preços preservados'
+      - name: Publicar somente quando houver dados válidos
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add prices.json fx.json\n          if test -f price-coverage.json; then git add price-coverage.json; fi
+          git add prices.json fx.json
+          if test -f price-coverage.json; then git add price-coverage.json; fi
           if ! git diff --cached --quiet; then
             git commit -m "Atualizar referências de preços YouPin"
             git push
