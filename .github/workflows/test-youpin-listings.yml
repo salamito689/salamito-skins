@@ -1,0 +1,55 @@
+name: Testar anuncios YouPin (somente leitura)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-listings:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Testar consulta publica sem cookies ou credenciais
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, urllib.error, socket
+          url = "https://pc-api.youpin898.com/api/homepage/pc/goods/market/queryOnSaleCommodityList"
+          payload = {
+              "gameId":"730", "listType":"10", "templateId":"110925",
+              "listSortType":1, "pageIndex":1, "pageSize":10, "sortType":0
+          }
+          req = urllib.request.Request(
+              url, data=json.dumps(payload).encode("utf-8"), method="POST",
+              headers={"Content-Type":"application/json", "Accept":"application/json",
+                       "User-Agent":"SalamitoSkins-ReadOnlyIntegrationTest/1.0"}
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=20) as res:
+                  body = res.read(300000)
+                  print("HTTP:", res.status, "Content-Type:", res.headers.get("Content-Type"))
+              data = json.loads(body)
+              print("API code:", data.get("Code"), "message:", data.get("Msg"))
+              items = data.get("Data")
+              print("TotalCount:", data.get("TotalCount"))
+              print("Data is list:", isinstance(items,list), "records:", len(items) if isinstance(items,list) else 0)
+              if isinstance(items,list) and items:
+                  sample = items[0]
+                  print("Sample field names:", sorted(sample.keys()))
+                  print("Fields present:", {key: key in sample for key in
+                    ("id","commodityHashName","price","abrade","paintSeed","actions","iconUrl","iconUrlLarge")})
+                  print("No listing values, identifiers or inspection links are printed.")
+              if data.get("Code") != 0 or not isinstance(items,list):
+                  raise SystemExit("API did not return a usable listing array")
+          except urllib.error.HTTPError as e:
+              print("HTTP error:",e.code,"(no response body printed)")
+              raise SystemExit(1)
+          except (urllib.error.URLError, socket.timeout, TimeoutError) as e:
+              print("Network failure:",type(e).__name__,str(e)[:200])
+              raise SystemExit(1)
+          except (ValueError, KeyError, TypeError) as e:
+              print("Unexpected response format:",type(e).__name__)
+              raise SystemExit(1)
+          PY
