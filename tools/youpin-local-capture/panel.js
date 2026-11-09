@@ -10,12 +10,16 @@ function refresh(){
  summary.textContent="Mostrando "+rows.length+" de "+all.filter(d=>group(d)===active).length+" registros capturados nesta faixa (até 10, menor preço primeiro).";
  cards.replaceChildren();if(!rows.length){cards.append(el("p","empty","Nenhum anúncio desta faixa foi capturado ainda."));return;}
  for(const d of rows){
- const c=el("div","card"),pic=el("div"),info=el("div"),price=el("div","price");
- if(d.image&&/^https:\/\//.test(d.image)){const img=el("img");img.src=d.image;img.alt="Imagem informada pela YouPin";img.referrerPolicy="no-referrer";pic.append(img)}else pic.append(el("span","small","Sem imagem individual"));
+ const c=el("article","card"),pic=el("div","photo"),info=el("div","details"),price=el("div","price");
+ if(d.image&&/^https:\\/\\//.test(d.image)){const img=el("img");img.src=d.image;img.alt="Imagem de referência fornecida pela YouPin";img.referrerPolicy="no-referrer";pic.append(img)}
+ else pic.append(el("span","small","Imagem não disponível"));
+ pic.append(el("span","flag","Imagem de referência · detalhes não confirmados"));
  const rate=Number(fx.value),cny=Number(d.priceCNY);
  price.textContent=fx.value&&rate>0&&Number.isFinite(cny)?"R$ "+((cny*1.01)*(rate+.025)).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}):"Preço em R$ indisponível";
- info.append(price,el("div","small","Float: "+(d.float??"—")),el("div","small","Pattern: "+(d.paintSeed??"—")));
- if(typeof d.inspect==="string"&&d.inspect.startsWith("steam://")){const a=el("a","small","Inspecionar no CS2");a.href=d.inspect;info.append(a)}
+ const specs=el("div","specs");const f=Number(d.float);
+ specs.append(el("span","small","Float: "+(d.float!=null&&Number.isFinite(f)?f.toFixed(4):"—")),el("span","small","Pattern: "+(d.paintSeed??"—")));
+ info.append(price,specs);
+ if(typeof d.inspect==="string"&&d.inspect.startsWith("steam://")){const a=el("a","inspect","Inspecionar no CS2");a.href=d.inspect;info.append(a)}
  c.append(pic,info);cards.append(c);
  }
 }
