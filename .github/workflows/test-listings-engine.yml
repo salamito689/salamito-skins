@@ -5,6 +5,7 @@ on:
       - 'scripts/reconcile-youpin.cjs'
       - 'scripts/reconcile-youpin.test.cjs'
       - 'scripts/listings-api.cjs'
+      - 'scripts/listings-api.test.cjs'
       - '.github/workflows/test-listings-engine.yml'
   workflow_dispatch:
 permissions:
@@ -17,4 +18,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test scripts/reconcile-youpin.test.cjs
+      - run: node --test scripts/reconcile-youpin.test.cjs scripts/listings-api.test.cjs
