@@ -1,7 +1,188 @@
 {
-  "generated_at": "2026-11-09T08:44:54.420879+00:00",
+  "generated_at": "2026-11-09T08:45:58.412533+00:00",
   "note": "Diagnostic based on exact catalog names; categories are approximate and may include items hidden in storefront. Missing does not mean unavailable on YouPin.",
-  "total_checked": 0,
-  "total_missing": 0,
-  "categories": {}
+  "total_checked": 47529,
+  "total_missing": 22394,
+  "categories": {
+    "Adesivos": {
+      "checked": 22268,
+      "missing": 13350,
+      "priced": 8918,
+      "examples_missing": [
+        "Sticker | Shooter",
+        "Sticker | Shooter (Foil)",
+        "Sticker | Shooter Close",
+        "Sticker | Shooter Close (Foil)",
+        "Sticker | Blue Snowflake",
+        "Sticker | Blue Snowflake (Foil)",
+        "Sticker | Polar Bears",
+        "Sticker | Polar Bears (Foil)",
+        "Sticker | Mountain",
+        "Sticker | Mountain (Foil)",
+        "Sticker | Frosty the Hitman",
+        "Sticker | Frosty the Hitman (Foil)",
+        "Sticker | Blacksite (Foil)",
+        "Sticker | compLexity Gaming | Katowice 2014",
+        "Sticker | compLexity Gaming (Holo) | Katowice 2014"
+      ]
+    },
+    "Agentes": {
+      "checked": 63,
+      "missing": 0,
+      "priced": 63,
+      "examples_missing": []
+    },
+    "Armas e skins": {
+      "checked": 16917,
+      "missing": 5689,
+      "priced": 11228,
+      "examples_missing": [
+        "Souvenir AK-47 | AUTOEXEC (Factory New)",
+        "Souvenir AK-47 | AUTOEXEC (Minimal Wear)",
+        "Souvenir AK-47 | AUTOEXEC (Field-Tested)",
+        "Souvenir AK-47 | AUTOEXEC (Well-Worn)",
+        "Souvenir AK-47 | AUTOEXEC (Battle-Scarred)",
+        "Souvenir AK-47 | Crane Flight (Factory New)",
+        "Souvenir AK-47 | Crane Flight (Minimal Wear)",
+        "Souvenir AK-47 | Crane Flight (Field-Tested)",
+        "Souvenir AK-47 | Crane Flight (Well-Worn)",
+        "Souvenir AK-47 | Crane Flight (Battle-Scarred)",
+        "Souvenir AK-47 | Searing Rage (Factory New)",
+        "Souvenir AK-47 | Searing Rage (Minimal Wear)",
+        "Souvenir AK-47 | Searing Rage (Field-Tested)",
+        "Souvenir AK-47 | Searing Rage (Well-Worn)",
+        "Souvenir AK-47 | Searing Rage (Battle-Scarred)"
+      ]
+    },
+    "Caixas e cápsulas": {
+      "checked": 481,
+      "missing": 45,
+      "priced": 436,
+      "examples_missing": [
+        "Pallet of Presents",
+        "Audience Participation Parcel",
+        "EMS One 2014 Souvenir Package",
+        "ESL One Cologne 2014 Inferno Souvenir Package",
+        "ESL One Cologne 2014 Nuke Souvenir Package",
+        "ESL One Cologne 2014 Cache Souvenir Package",
+        "ESL One Cologne 2014 Overpass Souvenir Package",
+        "DreamHack 2014 Dust II Souvenir Package",
+        "DreamHack 2014 Inferno Souvenir Package",
+        "DreamHack 2014 Mirage Souvenir Package",
+        "DreamHack 2014 Nuke Souvenir Package",
+        "DreamHack 2014 Cache Souvenir Package",
+        "DreamHack 2014 Cobblestone Souvenir Package",
+        "Cologne 2026 Sticker Capsule",
+        "ESL One Katowice 2015 Mirage Souvenir Package"
+      ]
+    },
+    "Chaveiros": {
+      "checked": 78,
+      "missing": 0,
+      "priced": 78,
+      "examples_missing": []
+    },
+    "Facas": {
+      "checked": 4020,
+      "missing": 437,
+      "priced": 3583,
+      "examples_missing": [
+        "★ StatTrak™ Bayonet | Freehand (Well-Worn)",
+        "★ StatTrak™ Bayonet | Freehand (Battle-Scarred)",
+        "★ StatTrak™ Bayonet | Slaughter (Field-Tested)",
+        "★ StatTrak™ Bayonet | Blue Steel (Factory New)",
+        "★ StatTrak™ Bayonet | Blue Steel (Field-Tested)",
+        "★ StatTrak™ Bayonet | Damascus Steel (Well-Worn)",
+        "★ StatTrak™ Bayonet | Damascus Steel (Battle-Scarred)",
+        "★ StatTrak™ Bayonet | Stained (Factory New)",
+        "★ StatTrak™ Bayonet | Case Hardened (Factory New)",
+        "★ StatTrak™ Bayonet | Lore (Well-Worn)",
+        "★ StatTrak™ Bayonet | Autotronic (Factory New)",
+        "★ Bayonet | Forest DDPAT (Factory New)",
+        "★ StatTrak™ Bayonet | Forest DDPAT (Factory New)",
+        "★ StatTrak™ Bayonet | Forest DDPAT (Well-Worn)",
+        "★ StatTrak™ Bayonet | Boreal Forest (Factory New)"
+      ]
+    },
+    "Grafites": {
+      "checked": 2111,
+      "missing": 2111,
+      "priced": 0,
+      "examples_missing": [
+        "Sealed Graffiti | Blood Boiler",
+        "Sealed Graffiti | Chabo",
+        "Sealed Graffiti | Drug War Veteran",
+        "Sealed Graffiti | Flickshot",
+        "Sealed Graffiti | Hamster Hawk",
+        "Sealed Graffiti | Ivette",
+        "Sealed Graffiti | Kawaii Killer CT",
+        "Sealed Graffiti | Kawaii Killer Terrorist",
+        "Sealed Graffiti | Martha",
+        "Sealed Graffiti | Old School",
+        "Sealed Graffiti | Pocket BBQ",
+        "Sealed Graffiti | Rekt",
+        "Sealed Graffiti | Shave Master",
+        "Sealed Graffiti | Shooting Star Return",
+        "Sealed Graffiti | Rising Skull"
+      ]
+    },
+    "Kits de música": {
+      "checked": 191,
+      "missing": 20,
+      "priced": 171,
+      "examples_missing": [
+        "Valve, Counter-Strike 2",
+        "Valve, CS:GO",
+        "Halo, The Master Chief Collection",
+        "Half-Life: Alyx, Anti-Citizen",
+        "Darren Korb, Hades Music Kit",
+        "Valve, CS:GO",
+        "Music Kit | ALRT, DOPAMINE HIT",
+        "StatTrak™ Music Kit | ALRT, DOPAMINE HIT",
+        "Music Kit | Altare, Change My Mind",
+        "StatTrak™ Music Kit | Altare, Change My Mind",
+        "Music Kit | borne, Give It To Me",
+        "StatTrak™ Music Kit | borne, Give It To Me",
+        "Music Kit | Pirapus, EVERYNITE",
+        "StatTrak™ Music Kit | Pirapus, EVERYNITE",
+        "Music Kit | Repiet & Julia Kleijn, On And On"
+      ]
+    },
+    "Luvas": {
+      "checked": 470,
+      "missing": 1,
+      "priced": 469,
+      "examples_missing": [
+        "★ Specialist Gloves | Big Swell (Factory New)"
+      ]
+    },
+    "Outros": {
+      "checked": 818,
+      "missing": 741,
+      "priced": 77,
+      "examples_missing": [
+        "5 Year Veteran Coin",
+        "Champion at DreamHack 2013",
+        "Finalist at DreamHack 2013",
+        "Semifinalist at DreamHack 2013",
+        "Quarterfinalist at DreamHack 2013",
+        "Champion at EMS One Katowice 2014",
+        "Finalist at EMS One Katowice 2014",
+        "Semifinalist at EMS One Katowice 2014",
+        "Quarterfinalist at EMS One Katowice 2014",
+        "Champion at ESL One Cologne 2014",
+        "Finalist at ESL One Cologne 2014",
+        "Semifinalist at ESL One Cologne 2014",
+        "Quarterfinalist at ESL One Cologne 2014",
+        "Bronze Cologne 2014 Pick'Em Trophy",
+        "Silver Cologne 2014 Pick'Em Trophy"
+      ]
+    },
+    "Patches": {
+      "checked": 112,
+      "missing": 0,
+      "priced": 112,
+      "examples_missing": []
+    }
+  }
 }
