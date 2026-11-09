@@ -1,0 +1,21 @@
+name: Testar motor de anuncios
+on:
+  pull_request:
+    paths:
+      - 'scripts/reconcile-youpin.cjs'
+      - 'scripts/reconcile-youpin.test.cjs'
+      - 'scripts/listings-api.cjs'
+      - 'scripts/listings-api.test.cjs'
+      - '.github/workflows/test-listings-engine.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/reconcile-youpin.test.cjs scripts/listings-api.test.cjs
