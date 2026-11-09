@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "source": "YouPin browser response supplied by user",
+  "snapshot_only": true,
+  "captured_at": "2026-11-09T11:48:33.226Z",
+  "reported_total_count": 1823,
+  "has_next": true,
+  "listings": [
+    {
+      "listing_id": "2097020034",
+      "market_hash_name": "AWP | Printstream (Field-Tested)",
+      "price_cny": 260,
+      "float_value": "0.3365965783596039000",
+      "paint_seed": 749,
+      "image_url": "https://youpin.img898.com/csgo/template/f9f45c0288114efc986ad7aa4ddc1bca.png",
+      "image_type": "generic_item_icon",
+      "inspect_link": "steam://run/730//+csgo_econ_action_preview%201101B5BCF6DEDB10091831A7183917211529F2BDA0E41251FC14730519110185550C1111912E2CD1DC8AAF54F1E0F3AD792A6115922357AB",
+      "status": "snapshot_unverified_current",
+      "youpin_url": null
+    },
+    {
+      "listing_id": "2097006652",
+      "market_hash_name": "AWP | Printstream (Field-Tested)",
+      "price_cny": 260.5,
+      "float_value": "0.3746431767940521000",
+      "paint_seed": 108,
+      "image_url": "https://pic.youpinimg.com/prod/client_dir/RF645F60D020342428E4576BFE52DB41C.webp",
+      "image_type": "listing_image",
+      "inspect_link": "steam://run/730//+csgo_econ_action_preview%203A2AEFCEA0E9F03B22331A8C33123C0A3E028198C5CF397A5652B9BABABA364A3E25BB9D28",
+      "status": "snapshot_unverified_current",
+      "youpin_url": null
+    },
+    {
+      "listing_id": "2097006655",
+      "market_hash_name": "AWP | Printstream (Field-Tested)",
+      "price_cny": 260.5,
+      "float_value": "0.3696013391017914000",
+      "paint_seed": 815,
+      "image_url": "https://youpin.img898.com/csgo/template/f9f45c0288114efc986ad7aa4ddc1bca.png",
+      "image_type": "generic_item_icon",
+      "inspect_link": "steam://run/730//+csgo_econ_action_preview%20B0A0445C71637AB1A8B99006B998B680B48853484445B3F01FB6D2BFB8B2A042888D00AB1B0DF5C0E8380DD833303030BCC0B8A4A8A5ED",
+      "status": "snapshot_unverified_current",
+      "youpin_url": null
+    },
+    {
+      "listing_id": "2097006657",
+      "market_hash_name": "AWP | Printstream (Field-Tested)",
+      "price_cny": 260.5,
+      "float_value": "0.2998414933681488000",
+      "paint_seed": 311,
+      "image_url": "https://youpin.img898.com/csgo/template/f9f45c0288114efc986ad7aa4ddc1bca.png",
+      "image_type": "generic_item_icon",
+      "inspect_link": "steam://run/730//+csgo_econ_action_preview%20C6D6774E0B160CC7DECFE670CFEEC0F6C2FE154F2032C58671C4AE45464646CAB6CE2582EA26",
+      "status": "snapshot_unverified_current",
+      "youpin_url": null
+    },
+    {
+      "listing_id": "1982149153",
+      "market_hash_name": "AWP | Printstream (Field-Tested)",
+      "price_cny": 261,
+      "float_value": "0.3135214447975158700",
+      "paint_seed": 99,
+      "image_url": "https://pic.youpinimg.com/prod/client_dir/R724714168E004C3092BC212E897A450B.webp",
+      "image_type": "listing_image",
+      "inspect_link": "steam://run/730//+csgo_econ_action_preview%205545E6AFE5B1EE544D5C75E35C7D5365516DB7DED7A0561536374C5D55458E1C485555D56A78555515956820A9CFEB10A902FEE83D5B2551E2BD1E39",
+      "status": "snapshot_unverified_current",
+      "youpin_url": null
+    },
+    {
+      "listing_id": "2097007702",
+      "market_hash_name": "AWP | Printstream (Field-Tested)",
+      "price_cny": 261.33,
+      "float_value": "0.3783094286918640000",
+      "paint_seed": 611,
+      "image_url": "https://youpin.img898.com/csgo/template/f9f45c0288114efc986ad7aa4ddc1bca.png",
+      "image_type": "generic_item_icon",
+      "inspect_link": "steam://run/730//+csgo_econ_action_preview%20EFFF2A58552025EEF7E6CF59E6C7E9DFEBD7290C6919ECAF0CEB8DE5E7ECFF07A6F2EFEF6FD0876C6F6F6FE39FE78B52E967",
+      "status": "snapshot_unverified_current",
+      "youpin_url": null
+    },
+    {
+      "listing_id": "2096982856",
+      "market_hash_name": "AWP | Printstream (Field-Tested)",
+      "price_cny": 261.6,
+      "float_value": "0.3633568882942199700",
+      "paint_seed": 543,
+      "image_url": "https://youpin.img898.com/csgo/template/f9f45c0288114efc986ad7aa4ddc1bca.png",
+      "image_type": "generic_item_icon",
+      "inspect_link": "steam://run/730//+csgo_econ_action_preview%20DFCF7537420B15DEC7D6FF69D6F7D9EFDBE7354C372ADC9F40DBB75C5F5F5FD3AFD7FCBD863F",
+      "status": "snapshot_unverified_current",
+      "youpin_url": null
+    },
+    {
+      "listing_id": "2096978355",
+      "market_hash_name": "AWP | Printstream (Field-Tested)",
+      "price_cny": 261.7,
+      "float_value": "0.3775283396244049000",
+      "paint_seed": 275,
+      "image_url": "https://youpin.img898.com/csgo/template/f9f45c0288114efc986ad7aa4ddc1bca.png",
+      "image_type": "generic_item_icon",
+      "inspect_link": "steam://run/730//+csgo_econ_action_preview%20DECE5B23352214DFC6D7FE68D7F6D8EEDAE63B485B28DD9E4DDCB65C5E5E5ED2AEDA135ADC7E",
+      "status": "snapshot_unverified_current",
+      "youpin_url": null
+    },
+    {
+      "listing_id": "2096978356",
+      "market_hash_name": "AWP | Printstream (Field-Tested)",
+      "price_cny": 261.7,
+      "float_value": "0.3753793835639953600",
+      "paint_seed": 628,
+      "image_url": "https://youpin.img898.com/csgo/template/f9f45c0288114efc986ad7aa4ddc1bca.png",
+      "image_type": "generic_item_icon",
+      "inspect_link": "steam://run/730//+csgo_econ_action_preview%20D1C15D4F6C281BD0C9D8F167D8F9D7E1D5E96B325127D29125D5B953515151DDA1D587445BF1",
+      "status": "snapshot_unverified_current",
+      "youpin_url": null
+    },
+    {
+      "listing_id": "2096978358",
+      "market_hash_name": "AWP | Printstream (Field-Tested)",
+      "price_cny": 261.7,
+      "float_value": "0.3715902864933014000",
+      "paint_seed": 619,
+      "image_url": "https://youpin.img898.com/csgo/template/f9f45c0288114efc986ad7aa4ddc1bca.png",
+      "image_type": "generic_item_icon",
+      "inspect_link": "steam://run/730//+csgo_econ_action_preview%20B2A24846484E78B3AABB9204BB9AB482B68A27304B47B1F259B6DA30323232BEC2B61232C472",
+      "status": "snapshot_unverified_current",
+      "youpin_url": null
+    }
+  ]
+}
