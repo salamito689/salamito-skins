@@ -529,6 +529,14 @@ function floatBounds(x){const min=Number(x.min_float),max=Number(x.max_float);re
 function groupName(x){return String(x._displayName||x.name).replace(/\\s*\\((Factory New|Minimal Wear|Field-Tested|Well-Worn|Battle-Scarred)\\)$/i,"").trim();}
 const FLOAT_PRESETS={FN:[0,.01,.02,.03,.04,.07],MW:[.07,.08,.09,.10,.11,.15],FT:[.15,.18,.21,.24,.27,.38],WW:[.38,.39,.40,.41,.42,.45],BS:[.45,.50,.63,.76,.90,1]};
 function wearRanges(key,low,high){const points=FLOAT_PRESETS[key]||[low,high];const ranges=[];for(let i=0;i<points.length-1;i++){const a=Math.max(low,points[i]),b=Math.min(high,points[i+1]);if(b>a+1e-8)ranges.push([a,b]);}return ranges;}
+
+let youpinListings=[];
+async function loadYoupinListings(){try{const r=await fetch("./data/youpin-listings.json",{cache:"no-store"});if(r.ok){const j=await r.json();youpinListings=Array.isArray(j.listings)?j.listings:[]}}catch{}}
+function ypListingHtml(item){
+ const validUrl=v=>{try{const u=new URL(v);return u.protocol==="https:"&&/(^|\\.)youpin898\\.com$/i.test(u.hostname)}catch{return false}};
+ const rows=youpinListings.filter(x=>x&&x.market_hash_name===item.name&&x.status==="verified"&&x.verified_at&&x.listing_id&&Number(x.price_cny)>0&&validUrl(x.youpin_url)).sort((a,b)=>Number(a.price_cny)-Number(b.price_cny)).slice(0,30);
+ return '<section style="margin-top:22px;border-top:1px solid #345071;padding-top:18px"><h3>Anúncios selecionados da YouPin</h3><p class="sub">Registros conferidos manualmente, sem sincronização em tempo real. Confirme preço e disponibilidade na YouPin. Valores em CNY, não são o preço final da Salamito.</p>'+(rows.length?rows.map(x=>'<article style="padding:12px;border:1px solid #355174;border-radius:12px;margin:10px 0"><strong>¥ '+Number(x.price_cny).toFixed(2)+' CNY</strong><p class="sub">Float: '+safe(x.float_value??"Não informado")+' · Pattern: '+safe(x.paint_seed??"Não informado")+'</p><p class="sub">Verificado em '+safe(String(x.verified_at).slice(0,10))+' · ID '+safe(x.listing_id)+'</p><a target="_blank" rel="noopener noreferrer" href="'+safe(x.youpin_url)+'">Conferir na YouPin</a></article>').join(""):'<p class="sub">Ainda não há anúncios individuais verificados para esta skin.</p>')+'</section>';
+}
 function openItem(x){
  const wear=wearOf(x),group=groupName(x);
  const siblings=items.filter(y=>groupName(y)===group&&wearOf(y)&&floatBounds(y));
@@ -548,7 +556,7 @@ function openItem(x){
 
   }
  }
- $("details").innerHTML='<img class="detailimg" src="'+safe(chosen.image)+'" alt=""><h2>'+safe(chosen._displayName||chosen.name)+'</h2><p>'+safe(categoryLabel(chosen._category))+' • '+safe(chosen.rarity?.name||"")+'</p>'+wearHtml+floatHtml+fadeHtml+priceMarkup(chosen)+'<p><a href="https://www.instagram.com/salamitoskins/" target="_blank" rel="noopener noreferrer">Instagram Salamito Skins</a></p>';
+ $("details").innerHTML='<img class="detailimg" src="'+safe(chosen.image)+'" alt=""><h2>'+safe(chosen._displayName||chosen.name)+'</h2><p>'+safe(categoryLabel(chosen._category))+' • '+safe(chosen.rarity?.name||"")+'</p>'+wearHtml+floatHtml+fadeHtml+priceMarkup(chosen)+ypListingHtml(chosen)+'<p><a href="https://www.instagram.com/salamitoskins/" target="_blank" rel="noopener noreferrer">Instagram Salamito Skins</a></p>';
  $("modal").showModal();
  if(isFade){
   const preset=$("fadepreset"),custom=$("fadecustom"),min=$("fademin"),max=$("fademax"),msg=$("fademsg");
@@ -567,5 +575,5 @@ function openItem(x){
  }
 }
 $("grid").addEventListener("click",e=>{const b=e.target.closest("[data-id]");if(b){const x=items.find(v=>v.id===b.dataset.id);if(x)openItem(x);}});$("close").onclick=()=>$("modal").close();$("more").onclick=append;["search","category","sort","knifeStattrak"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",filter));
-(async()=>{try{const res=await fetch(BASE);if(!res.ok)throw Error("HTTP "+res.status);const data=await res.json();items=normalize(data);if(!items.length)throw Error("Base vazia");$("category").insertAdjacentHTML("beforeend",broadCategories.map(c=>'<option value="'+safe(c)+'">'+safe(c)+'</option>').join(""));$("status").hidden=true;filter();loadPrices();}catch(err){$("status").innerHTML='Não foi possível carregar o catálogo público. Verifique sua conexão e recarregue a página. <small>'+safe(err.message)+'</small>'; $("count").textContent="Catálogo temporariamente indisponível";}})();
+(async()=>{try{const res=await fetch(BASE);if(!res.ok)throw Error("HTTP "+res.status);const data=await res.json();items=normalize(data);if(!items.length)throw Error("Base vazia");$("category").insertAdjacentHTML("beforeend",broadCategories.map(c=>'<option value="'+safe(c)+'">'+safe(c)+'</option>').join(""));$("status").hidden=true;filter();loadPrices();loadYoupinListings();}catch(err){$("status").innerHTML='Não foi possível carregar o catálogo público. Verifique sua conexão e recarregue a página. <small>'+safe(err.message)+'</small>'; $("count").textContent="Catálogo temporariamente indisponível";}})();
 </script></body></html>
