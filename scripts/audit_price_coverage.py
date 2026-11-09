@@ -12,6 +12,10 @@ phase=prices.get("phase_prices",{})
 groups=Counter()
 missing=Counter()
 examples={}
+if isinstance(catalog,dict):
+    catalog=list(catalog.values())
+if not isinstance(catalog,list) or len(catalog)<1000:
+    raise RuntimeError("Catálogo inesperado; auditoria não publicada")
 for item in catalog:
     if not isinstance(item,dict):continue
     name=item.get("market_hash_name") or item.get("name") or ""
@@ -40,6 +44,8 @@ for item in catalog:
         missing[category]+=1
         examples.setdefault(category,[])
         if len(examples[category])<15:examples[category].append(name)
+if sum(groups.values())<1000:
+    raise RuntimeError("Auditoria vazia; não sobrescrever relatório anterior")
 report={"generated_at":datetime.now(timezone.utc).isoformat(),"note":"Diagnostic based on exact catalog names; categories are approximate and may include items hidden in storefront. Missing does not mean unavailable on YouPin.","total_checked":sum(groups.values()),"total_missing":sum(missing.values()),"categories":{k:{"checked":v,"missing":missing[k],"priced":v-missing[k],"examples_missing":examples.get(k,[])} for k,v in sorted(groups.items())}}
 pathlib.Path("price-coverage.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
 print("Coverage:",report["total_checked"],"missing:",report["total_missing"])
