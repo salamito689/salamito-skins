@@ -11,9 +11,44 @@ data = payload.get("data")
 if not isinstance(data, dict) or len(data) < 1000:
     raise RuntimeError("Resposta vazia/inválida; mantendo preços anteriores")
 prices = {}
+phase_prices = {}
+def positive(value):
+    try:
+        n = float(value)
+        return n if n > 0 else None
+    except (TypeError, ValueError):
+        return None
+def pattern_cny(entry, buff):
+    native = entry.get("native_currency") or {}
+    cny = positive(native.get("ask")) if isinstance(native, dict) else None
+    if cny:
+        return cny
+    usd = positive(entry.get("ask"))
+    generic_usd = positive(buff.get("ask"))
+    generic_native = buff.get("native_currency") or {}
+    generic_cny = positive(generic_native.get("ask")) if isinstance(generic_native, dict) else None
+    if usd and generic_usd and generic_cny:
+        return round(usd * generic_cny / generic_usd, 4)
+    return None
 for name, record in data.items():
     if not isinstance(record, dict):
         continue
+    buff = record.get("buff")
+    if isinstance(buff, dict):
+        patterns = buff.get("patterns")
+        if isinstance(patterns, list):
+            variants = {}
+            for entry in patterns:
+                if not isinstance(entry, dict):
+                    continue
+                pattern = str(entry.get("pattern") or "").strip()
+                if pattern not in ("Phase 1", "Phase 2", "Phase 3", "Phase 4", "Ruby", "Sapphire", "Black Pearl", "Emerald"):
+                    continue
+                cny_phase = pattern_cny(entry, buff)
+                if cny_phase:
+                    variants[pattern] = {"cny": cny_phase, "source": "Buff163", "updated_at": entry.get("updated_at")}
+            if variants:
+                phase_prices[name] = variants
     yp = record.get("youpin")
     if not isinstance(yp, dict):
         continue
@@ -30,6 +65,6 @@ for name, record in data.items():
     prices[name] = {"cny": cny if cny and cny > 0 else None, "usd": usd if usd and usd > 0 else None}
 if len(prices) < 100:
     raise RuntimeError("Poucos preços válidos; mantendo arquivo anterior")
-output = {"source": "OpenSkin / YouPin", "source_updated_at": payload.get("updated_at"), "fetched_at": datetime.now(timezone.utc).isoformat(), "count": len(prices), "prices": prices}
+output = {"phase_prices": phase_prices, "phase_items": len(phase_prices), "source": "OpenSkin / YouPin + Buff163 phases", "source_updated_at": payload.get("updated_at"), "fetched_at": datetime.now(timezone.utc).isoformat(), "count": len(prices), "prices": prices}
 pathlib.Path("prices.json").write_text(json.dumps(output, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-print(f"Preços válidos: {len(prices)}")
+print(f"Preços YouPin: {len(prices)}; famílias Doppler Buff com fases: {len(phase_prices)}")
