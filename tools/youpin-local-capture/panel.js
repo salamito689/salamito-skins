@@ -11,7 +11,7 @@ function refresh(){
  cards.replaceChildren();if(!rows.length){cards.append(el("p","empty","Nenhum anúncio desta faixa foi capturado ainda."));return;}
  for(const d of rows){
  const c=el("article","card"),pic=el("div","photo"),info=el("div","details"),price=el("div","price");
- if(d.image&&/^https:\\/\\//.test(d.image)){const img=el("img");img.src=d.image;img.alt="Imagem de referência fornecida pela YouPin";img.referrerPolicy="no-referrer";pic.append(img)}
+ if(d.image&&typeof d.image==="string"&&d.image.startsWith("https://")){const img=el("img");img.src=d.image;img.alt="Imagem de referência fornecida pela YouPin";img.referrerPolicy="no-referrer";pic.append(img)}
  else pic.append(el("span","small","Imagem não disponível"));
  pic.append(el("span","flag","Imagem de referência · detalhes não confirmados"));
  const rate=Number(fx.value),cny=Number(d.priceCNY);
