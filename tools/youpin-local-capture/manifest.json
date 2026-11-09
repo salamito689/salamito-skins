@@ -1,0 +1,7 @@
+{
+  "manifest_version": 3,
+  "name": "Salamito YouPin - captura local",
+  "version": "0.1.0",
+  "description": "Captura localmente respostas de listagens da YouPin observadas no DevTools, sem login, sem requisições extras e sem envio.",
+  "devtools_page": "devtools.html"
+}
