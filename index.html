@@ -596,8 +596,13 @@ function openItem(x){
  const wear=wearOf(x),group=groupName(x);
  const siblings=items.filter(y=>groupName(y)===group&&wearOf(y)&&floatBounds(y));
  const unique=new Map();for(const y of siblings)unique.set(wearOf(y).key,y);
- const chosen=wear&&unique.has(wear.key)?unique.get(wear.key):x;
+ const chosen=x; // Preserve the exact Doppler phase selected in the catalog.
  const current=wearOf(chosen),bounds=floatBounds(chosen);
+ const chosenPhase=dopplerVariant(chosen);
+ const phaseSiblings=chosenPhase?items.filter(y=>String(y.market_hash_name||y.name)===String(chosen.market_hash_name||chosen.name)&&wearOf(y)?.key===current?.key&&dopplerVariant(y)):[];
+ const phases=new Map();
+ for(const y of phaseSiblings)if(!phases.has(dopplerVariant(y)))phases.set(dopplerVariant(y),y);
+ const phaseHtml=chosenPhase?'<div class="float-filter"><strong>Variante Doppler</strong><div class="wear-tabs">'+[...phases.entries()].sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true})).map(([phase,item])=>'<button type="button" class="wear-tab'+(phase===chosenPhase?' active':'')+'" data-phase-id="'+safe(item.id)+'">'+safe(phase)+'</button>').join("")+'</div></div>':"";
  const isFade=/\|\s*Fade\s*(?:\(|$)/i.test(String(chosen.name||""));
  const fadeHtml=isFade?'<div class="float-filter"><label for="fadepreset">Porcentagem de Fade</label><select id="fadepreset"><option value="all">Todas (80%–100%)</option><option value="80-90">80%–90%</option><option value="90-93">90%–93%</option><option value="93-95">93%–95%</option><option value="95-97">95%–97%</option><option value="97-99">97%–99%</option><option value="99-100">99%–100%</option><option value="custom">Personalizado</option></select><div id="fadecustom" class="floatrow" hidden><label>Mínimo (%)<input id="fademin" type="number" min="80" max="100" step="0.1" value="80"></label><label>Máximo (%)<input id="fademax" type="number" min="80" max="100" step="0.1" value="100"></label></div><p id="fademsg" class="sub" role="status" hidden></p><p class="sub">Preferência visual: a porcentagem real de cada anúncio dependerá do pattern seed e da integração com o mercado.</p></div>':"";
  const wearHtml=unique.size?'<h3>Escolha o desgaste</h3><div class="wear-tabs">'+WEARS.filter(w=>unique.has(w.key)).map(w=>'<button type="button" class="wear-tab'+(current?.key===w.key?' active':'')+'" data-wear="'+w.key+'">'+w.key+' · '+w.name+'</button>').join("")+'</div>':"";
@@ -611,7 +616,7 @@ function openItem(x){
 
   }
  }
- $("details").innerHTML='<img class="detailimg" src="'+safe(chosen.image)+'" alt=""><h2>'+safe(chosen._displayName||chosen.name)+'</h2><p>'+safe(categoryLabel(chosen._category))+' • '+safe(chosen.rarity?.name||"")+'</p>'+wearHtml+floatHtml+fadeHtml+priceMarkup(chosen)+ypListingHtml(chosen)+ypSnapshotHtml(chosen)+'<p><a href="https://www.instagram.com/salamitoskins/" target="_blank" rel="noopener noreferrer">Instagram Salamito Skins</a></p>';
+ $("details").innerHTML='<img class="detailimg" src="'+safe(chosen.image)+'" alt=""><h2>'+safe(chosen._displayName||chosen.name)+'</h2><p>'+safe(categoryLabel(chosen._category))+' • '+safe(chosen.rarity?.name||"")+'</p>'+phaseHtml+wearHtml+floatHtml+fadeHtml+priceMarkup(chosen)+ypListingHtml(chosen)+ypSnapshotHtml(chosen)+'<p><a href="https://www.instagram.com/salamitoskins/" target="_blank" rel="noopener noreferrer">Instagram Salamito Skins</a></p>';
  $("modal").showModal();
  if(isFade){
   const preset=$("fadepreset"),custom=$("fadecustom"),min=$("fademin"),max=$("fademax"),msg=$("fademsg");
@@ -619,7 +624,8 @@ function openItem(x){
   preset.addEventListener("change",()=>{custom.hidden=preset.value!=="custom";if(preset.value==="all"){min.value="80";max.value="100";}else if(preset.value!=="custom"){const [a,b]=preset.value.split("-");min.value=a;max.value=b;}validate();});
   [min,max].forEach(input=>input.addEventListener("input",()=>{preset.value="custom";custom.hidden=false;validate();}));
  }
- $("details").querySelectorAll("[data-wear]").forEach(btn=>btn.addEventListener("click",()=>openItem(unique.get(btn.dataset.wear))));
+ $("details").querySelectorAll("[data-phase-id]").forEach(btn=>btn.addEventListener("click",()=>{const next=items.find(v=>v.id===btn.dataset.phaseId);if(next)openItem(next);}));
+ $("details").querySelectorAll("[data-wear]").forEach(btn=>btn.addEventListener("click",()=>{const next=unique.get(btn.dataset.wear);if(next)openItem(next);}));
  if(bounds&&current&&$("floatpreset")){
   const low=Math.max(bounds.min,current.min),high=Math.min(bounds.max,current.max);
   const ranges=wearRanges(current.key,low,high);
