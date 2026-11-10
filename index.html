@@ -669,7 +669,7 @@ $("cartItems").addEventListener("click",e=>{
 });
 renderCart();
 
-const CHECKOUT_WHATSAPP=""; // Configure aqui seu número comercial: somente DDI + DDD + número (ex.: 5554999999999).
+const CHECKOUT_WHATSAPP="5554991426453"; // Configure aqui seu número comercial: somente DDI + DDD + número (ex.: 5554999999999).
 function checkoutEntries(){return Object.entries(cart).map(([id,q])=>({item:items.find(x=>x.id===id),qty:Math.max(1,Math.min(99,Number(q)||1))}));}
 function checkoutTotals(){let cents=0,missing=0;for(const e of checkoutEntries()){const p=e.item&&finalPrice(e.item);if(p===null||p===undefined)missing++;else cents+=Math.round(p*100)*e.qty;}return {cents,missing};}
 function drawCheckout(){const entries=checkoutEntries();const totals=checkoutTotals();$("checkoutReview").innerHTML=entries.map(({item,qty})=>'<div class="checkout-line"><strong>'+safe(item?item._displayName||item.name:"Item não encontrado")+'</strong><small>Quantidade: '+qty+' · '+(item&&finalPrice(item)!==null?brl(finalPrice(item))+' cada':'Preço indisponível')+'</small><small>Desgaste: '+safe(item?wearOf(item)?.name||"não aplicável":"desconhecido")+' · Float exato: pendente · Pattern: pendente</small></div>').join("")+'<h3>Subtotal estimado: '+brl(totals.cents/100)+'</h3>'+(totals.missing?'<p class="checkout-note">Alguns itens estão sem preço; remova-os para continuar.</p>':'');}
