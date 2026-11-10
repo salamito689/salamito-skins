@@ -49,11 +49,10 @@ const DOPPLER_PAINTS=Object.freeze({"415":"Ruby","416":"Sapphire","417":"Black P
 function dopplerVariant(x){
  const n=String(x.name||"");
  if(!/doppler/i.test(n))return "";
- // The catalog publishes a dedicated 'phase' field. Prefer it over paint-index inference.
- const raw=String(x.phase?.name??x.phase??"").trim();
- const m=raw.match(/(?:phase\\s*([1-4])|ruby|sapphire|black pearl|emerald)/i);
+ const raw=String(x.phase?.name??x.phase??x.original?.phase??"").trim();
+ const m=raw.match(/(?:phase[\s_-]*([1-4])|ruby|sapphire|black pearl|emerald)/i);
  if(m)return m[1]?"Phase "+m[1]:({"ruby":"Ruby","sapphire":"Sapphire","black pearl":"Black Pearl","emerald":"Emerald"})[m[0].toLowerCase()];
- const index=String(x.paint_index??x.paintIndex??x.paint?.index??"").trim();
+ const index=String(x.paint_index??x.paintIndex??x.paint?.index??x.original?.paint_index??"").trim();
  const v=DOPPLER_PAINTS[index];
  if(!v)return "";
  const number=Number(index);
@@ -159,11 +158,12 @@ function requiresVariantPrice(x){
  // all these variants can share one generic market price key.
  const variant=dopplerVariant(x);
  const display=String(x._displayName||x.name||"");
- return !!variant||(/(?:Gamma\s+)?Doppler\b/i.test(display)&&/\b(?:Phase\s*[1-4]|Ruby|Sapphire|Black Pearl|Emerald)\b/i.test(display));
+ return /(?:Gamma\s+)?Doppler\b/i.test(display)||!!variant;
 }
 function youpinPrice(x){
  if(requiresVariantPrice(x)){
   const variant=dopplerVariant(x);
+  if(!variant)return null; // Never show a generic Doppler price for an unidentified phase.
   const key=x.market_hash_name||x.name;
   const p=phasePriceMap?.[key]?.[variant];
   const cny=Number(p?.cny);
