@@ -143,6 +143,7 @@ const FX_CACHE_KEY="salamito-last-valid-cny-brl-v1";
 function acceptFx(data){
  const rate=Number(data?.rate),timestamp=Date.parse(data?.fetched_at||"");
  if(!(rate>0&&Number.isFinite(rate)&&Number.isFinite(timestamp)))return false;
+ if(String(data?.source||"")!=="Wise API")return false;
  fxCnyBrl=rate;fxSource=String(data.source||"Fonte não identificada");fxTimestamp=data.fetched_at;
  fxStale=Date.now()-timestamp>=36*3600000||Date.now()<timestamp;
  try{localStorage.setItem(FX_CACHE_KEY,JSON.stringify({rate,source:fxSource,fetched_at:fxTimestamp}));}catch(_){}
