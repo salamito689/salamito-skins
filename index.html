@@ -114,7 +114,20 @@ function rarityColor(x){
 function categoryLabel(c){return c==="Outros itens"?"Passe de Major":c;}
 const PRICE_URL="prices.json";
 const FX_URL="https://open.er-api.com/v6/latest/CNY";
-let priceMap=null,phasePriceMap=null,fxCnyBrl=null,fxSource="",fxTimestamp=null,priceTimestamp=null,priceError="";
+let priceMap=null,phasePriceMap=null,fxCnyBrl=null,fxSource="",fxTimestamp=null,priceTimestamp=null,priceError="",fxStale=false;
+const FX_CACHE_KEY="salamito-last-valid-cny-brl-v1";
+function acceptFx(data){
+ const rate=Number(data?.rate),timestamp=Date.parse(data?.fetched_at||"");
+ if(!(rate>0&&Number.isFinite(rate)&&Number.isFinite(timestamp)))return false;
+ fxCnyBrl=rate;fxSource=String(data.source||"Fonte não identificada");fxTimestamp=data.fetched_at;
+ fxStale=Date.now()-timestamp>=36*3600000||Date.now()<timestamp;
+ try{localStorage.setItem(FX_CACHE_KEY,JSON.stringify({rate,source:fxSource,fetched_at:fxTimestamp}));}catch(_){}
+ return true;
+}
+function restoreFx(){
+ try{const cached=JSON.parse(localStorage.getItem(FX_CACHE_KEY)||"null");if(cached)acceptFx(cached);}catch(_){}
+}
+restoreFx();
 const brl=n=>new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(n);
 function requiresVariantPrice(x){
  // Doppler phase/gem is identified by paint index, not market_hash_name:
@@ -150,7 +163,7 @@ function priceMarkup(x){
  const amount=finalPrice(x);
  if(requiresVariantPrice(x)&&amount===null)return '<div class="market-price"><small>Item possivelmente com baixa liquidez. Consultar preços na dm!</small></div>';
  if(amount===null)return '<div class="market-price"><small>Item possivelmente com baixa liquidez. Consultar preços na dm!</small></div>';
- return '<div class="market-price"><strong>'+brl(amount)+'</strong><small>'+(requiresVariantPrice(x)?'Referência Buff163 · '+safe(dopplerVariant(x))+' · estimativa':'Preço estimado Salamito · sujeito à confirmação')+'</small></div>';
+ return '<div class="market-price"><strong>'+brl(amount)+'</strong><small>'+(fxStale?'Cotação desatualizada · confirmar antes da compra':(requiresVariantPrice(x)?'Referência Buff163 · '+safe(dopplerVariant(x))+' · estimativa':'Preço estimado Salamito · sujeito à confirmação'))+'</small></div>';
 }
 function paintPrices(){
  document.querySelectorAll("#grid .item[data-id]").forEach(el=>{
@@ -167,12 +180,7 @@ async function loadPrices(){
    fetch(PRICE_URL+"?t="+Math.floor(Date.now()/300000),{signal:AbortSignal.timeout(25000)}).then(r=>{if(!r.ok)throw Error("Preços HTTP "+r.status);return r.json();}),
    fetch("fx.json?t="+Math.floor(Date.now()/300000),{signal:AbortSignal.timeout(12000)}).then(r=>{if(!r.ok)throw Error("Câmbio HTTP "+r.status);return r.json();})
   ]);
-  if(fx.status==="fulfilled"&&Number(fx.value?.rate)>0){
-   const age=Date.now()-Date.parse(fx.value.fetched_at||"");
-   if(Number.isFinite(age)&&age>=0&&age<36*3600000){
-    fxCnyBrl=Number(fx.value.rate);fxSource=String(fx.value.source||"Fonte não identificada");fxTimestamp=fx.value.fetched_at;
-   }
-  }
+  if(fx.status==="fulfilled")acceptFx(fx.value);
   if(prices.status!=="fulfilled"||!prices.value?.prices)throw Error("Aguardando primeira atualização automática dos preços no GitHub");
   priceMap=prices.value.prices;phasePriceMap=prices.value.phase_prices||{};priceTimestamp=prices.value.source_updated_at||prices.value.fetched_at||null;
   priceError="";filter();paintPrices();
