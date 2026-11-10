@@ -517,8 +517,10 @@ function rarityKey(x){return fold(x.rarity?.name||"");}
 let selectedExtras=new Set(),selectedWears=new Set(),floatMin="",floatMax="",priceMax=null;
 function syncPriceControls(){
  const range=$("sidePriceMax"),input=$("sidePriceInput"),label=$("sidePriceLabel");
- const value=priceMax===null?Number(range.max):priceMax;
- range.value=Math.min(Number(range.max),Math.max(0,value));
+ const ceiling=Number(range.dataset.ceiling)||10000;
+ // The slider uses a fixed 0–1000 scale: 0 is the left edge and no limit is the right edge.
+ range.min="0";range.max="1000";range.step="1";
+ range.value=priceMax===null?"1000":String(Math.round(Math.min(ceiling,Math.max(0,priceMax))/ceiling*1000));
  input.value=priceMax===null?"":String(priceMax);
  label.textContent=priceMax===null?"Sem limite":brl(priceMax);
 }
@@ -527,16 +529,15 @@ function updatePriceRange(matching){
  const prices=matching.map(finalPrice).filter(p=>p!==null);
  const highest=prices.length?Math.max(...prices):10000;
  const limit=Math.max(1000,Math.ceil(highest/1000)*1000);
- range.max=String(limit);
- range.step=limit>100000?100:10;
+ range.dataset.ceiling=String(limit);
  $("sidePriceEnd").textContent=brl(limit);
  range.disabled=!prices.length;
  $("sidePriceInput").disabled=!prices.length;
  syncPriceControls();
 }
 $("sidePriceMax").addEventListener("input",()=>{
- const range=$("sidePriceMax");
- priceMax=Number(range.value)>=Number(range.max)?null:Number(range.value);
+ const range=$("sidePriceMax"),position=Number(range.value),ceiling=Number(range.dataset.ceiling)||10000;
+ priceMax=position>=1000?null:position<=0?0:Math.round((position/1000)*ceiling);
  syncPriceControls();filter();
 });
 $("sidePriceInput").addEventListener("input",()=>{
