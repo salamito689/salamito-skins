@@ -728,4 +728,16 @@ $("checkoutForm").onsubmit=e=>{e.preventDefault();if(!e.target.reportValidity())
 $("grid").addEventListener("click",e=>{const add=e.target.closest("[data-cart-add]");if(add){addToCart(add.dataset.cartAdd);return;}const b=e.target.closest("[data-id]");if(b){const x=items.find(v=>v.id===b.dataset.id);if(x)openItem(x);}});
 $("grid").addEventListener("keydown",e=>{if(e.target.matches('.item[role="button"]')&&(e.key==="Enter"||e.key===" ")){e.preventDefault();const x=items.find(v=>v.id===e.target.dataset.id);if(x)openItem(x);}});$("close").onclick=()=>$("modal").close();$("more").onclick=append;let searchFrame=0; $("search").addEventListener("input",()=>{cancelAnimationFrame(searchFrame);searchFrame=requestAnimationFrame(filter);});["category","sort","knifeStattrak"].forEach(id=>$(id).addEventListener("change",filter));
 (async()=>{try{const res=await fetch(BASE);if(!res.ok)throw Error("HTTP "+res.status);const data=await res.json();items=normalize(data);if(!items.length)throw Error("Base vazia");prepareSearchIndex();$("category").insertAdjacentHTML("beforeend",broadCategories.map(c=>'<option value="'+safe(c)+'">'+safe(c)+'</option>').join(""));$("status").hidden=true;filter();loadPrices();loadYoupinListings();}catch(err){$("status").innerHTML='Não foi possível carregar o catálogo público. Verifique sua conexão e recarregue a página. <small>'+safe(err.message)+'</small>'; $("count").textContent="Catálogo temporariamente indisponível";}})();
+
+// Refresh the Wise quote while the catalog remains open; never accept other FX sources.
+setInterval(async()=>{
+ try{
+  const response=await fetch("fx.json?wise_refresh="+Date.now(),{cache:"no-store",signal:AbortSignal.timeout(12000)});
+  if(!response.ok)return;
+  const data=await response.json();
+  if(data?.source!=="Wise API"||data?.fetched_at===fxTimestamp)return;
+  if(!acceptFx(data))return;
+  if(items.length){filter();paintPrices();renderCart();}
+ }catch(_){}
+},60000);
 </script><style id="salamito-catalog-nav">.salamito-back{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border:1px solid #4670c7;border-radius:12px;color:#dbe9ff;text-decoration:none;font-weight:700;font-size:13px;background:#0b244a}.salamito-back:hover{background:#153a83}.salamito-back svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}</style><script>document.addEventListener("DOMContentLoaded",()=>{const head=document.querySelector("header");if(!head)return;const a=document.createElement("a");a.href="index.html";a.className="salamito-back";a.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10h-6v-6H9v6H3z"/></svg>Início';const cart=[...head.querySelectorAll("button")].find(b=>/carrinho/i.test(b.textContent));if(cart)cart.before(a);else head.append(a);});</script></body></html>
