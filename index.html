@@ -440,9 +440,43 @@ function knifeSearchAliases(x){
  ];
  return finishes.filter(([en])=>name.includes(en)).map(([,pt])=>pt).join(" ");
 }
+function prepareSearchIndex(){
+ for(const x of items)x._searchFast=fold(x._search+" "+gloveSearchAliases(x)+" "+knifeSearchAliases(x));
+}
 function matchesSearch(x,terms){
- const hay=fold(x._search+" "+gloveSearchAliases(x)+" "+knifeSearchAliases(x));
+ const hay=x._searchFast||"";
  return terms.every(t=>hay.includes(t));
+}
+function mixedFirst80(list){
+ if(list.length<2)return list;
+ // Select a diversified first page without changing the remaining catalog.
+ const withPrices=list.map((x,i)=>({x,i,p:finalPrice(x),key:String(x.name||"").replace(/^★\\s*/,"").replace(/^StatTrak™\\s*/,"").replace(/\\s*\\((?:Factory New|Minimal Wear|Field-Tested|Well-Worn|Battle-Scarred)\\)$/i,"").replace(/\\s*\\((?:Phase [1-4]|Ruby|Sapphire|Emerald|Black Pearl)\\)$/i,"").toLowerCase()}));
+ const known=withPrices.filter(e=>e.p!==null&&Number.isFinite(e.p)).sort((a,b)=>a.p-b.p);
+ const cut1=known[Math.floor(known.length/3)]?.p??0,cut2=known[Math.floor(known.length*2/3)]?.p??Infinity;
+ const tiers=[[],[],[]];
+ for(const e of withPrices){const t=e.p===null?1:e.p<=cut1?0:e.p>=cut2?2:1;tiers[t].push(e);}
+ // Stable dispersion within each price tier; spread different finishes and models.
+ for(const arr of tiers)arr.sort((a,b)=>{
+  const h=str=>{let n=2166136261;for(let j=0;j<str.length;j++)n=Math.imul(n^str.charCodeAt(j),16777619);return n>>>0;};
+  return h(a.key+"salamito")-h(b.key+"salamito")||a.i-b.i;
+ });
+ const used=new Set(),recent=[],front=[],cursor=[0,0,0],sequence=[0,2,1,0,1,2];
+ for(let turn=0;front.length<Math.min(80,list.length)&&turn<list.length;turn++){
+  let choice=null,chosenTier=-1,chosenAt=-1;
+  for(let step=0;step<3&&!choice;step++){
+   const tier=sequence[(turn+step)%sequence.length],arr=tiers[tier];
+   let at=cursor[tier];while(at<arr.length&&used.has(arr[at].i))at++;
+   let best=-1;
+   for(let j=at;j<Math.min(arr.length,at+120);j++)if(!used.has(arr[j].i)&&!recent.includes(arr[j].key)){best=j;break;}
+   if(best<0)best=at;
+   if(best<arr.length){choice=arr[best];chosenTier=tier;chosenAt=best;}
+  }
+  if(!choice)break;
+  const arr=tiers[chosenTier];[arr[cursor[chosenTier]],arr[chosenAt]]=[arr[chosenAt],arr[cursor[chosenTier]]];
+  cursor[chosenTier]++;
+  used.add(choice.i);front.push(choice.x);recent.push(choice.key);if(recent.length>9)recent.shift();
+ }
+ return front.concat(withPrices.filter(e=>!used.has(e.i)).map(e=>e.x));
 }
 const weaponRarityCategories=new Set(["Rifles","Pesadas","Submetralhadoras","Pistolas","Zeus"]);
 const broadCategories=["Armas","Facas","Luvas","Agentes","Chaveiros","Colecionáveis"];
@@ -521,7 +555,7 @@ $("raritySidebar").addEventListener("change",e=>{
  else if(el.dataset.extra){if(el.checked)selectedExtras.add(el.dataset.extra);else selectedExtras.delete(el.dataset.extra);filter();}
 });
 $("clearRarity").addEventListener("click",()=>{selectedTypes.clear();selectedRarities.clear();selectedExtras.clear();selectedWears.clear();floatMin="";floatMax="";$("sideFloatMin").value="";$("sideFloatMax").value="";$("category").value="";$("knifeStattrak").value="all";filter();});
-function filter(){let q=searchPortuguese($("search").value);q=q.replace(/\b(?:faze|fase|phase|p)\s*([1-4])\b/g,"phase $1").replace(/\b(?:faze|fase)\b/g,"phase");const terms=q.split(/\s+/).filter(Boolean),cat=$("category").value;const eligible=x=>["Facas","Rifles","Pesadas","Submetralhadoras","Pistolas","Zeus","Armas e skins"].includes(x._category);const matching=items.filter(x=>storefrontItemVisible(x)&&matchesSearch(x,terms)&&categoryMatches(x,cat));if(cat!==previousRarityCategory){selectedTypes.clear();selectedRarities.clear();selectedExtras.clear();selectedWears.clear();floatMin="";floatMax="";$("sideFloatMin").value="";$("sideFloatMax").value="";previousRarityCategory=cat;}updateRaritySidebar(cat,matching);const showStattrak=(["Facas","Rifles","Pesadas","Submetralhadoras","Pistolas","Zeus","Armas e skins"].includes(cat)||Boolean(q&&matching.some(eligible)))&&matching.some(x=>eligible(x)&&/StatTrak™/i.test(x.name));$("stattrakWrap").hidden=!showStattrak;if(!showStattrak)$("knifeStattrak").value="all";const knifeStattrak=$("knifeStattrak").value;visible=items.filter(x=>{if(!storefrontItemVisible(x))return false;const hay=fold(x._search);const knifeName=fold(x.name).replace(/^(stattrak|souvenir) /,"");const knifeModels=/^(bayonet|bowie knife|butterfly knife|classic knife|falchion knife|flip knife|gut knife|huntsman knife|karambit|kukri knife|m9 bayonet|navaja knife|nomad knife|paracord knife|shadow daggers|skeleton knife|stiletto knife|survival knife|talon knife|ursus knife)(?:$|\s)/;const isPlainKnife=knifeModels.test(knifeName)&&!x.name.includes("|")&&!x.name.includes(" | ");return terms.every(t=>(isPlainKnife&&"vanilla".startsWith(t)&&t.length>=1)||hay.includes(t)||fold(gloveSearchAliases(x)+" "+knifeSearchAliases(x)).includes(t))&&categoryMatches(x,cat)&&(!selectedTypes.size||selectedTypes.has(x._category))&&(!selectedRarities.size||selectedRarities.has(rarityKey(x)))&&(!selectedExtras.size||selectedExtras.has(extraType(x)))&&(!selectedWears.size||!!(wearOf(x)&&selectedWears.has(wearOf(x).key)))&&((floatMin===""&&floatMax==="")||!!(wearOf(x)&&wearOf(x).max>=(floatMin===""?0:Number(floatMin))&&wearOf(x).min<=(floatMax===""?1:Number(floatMax))))&&(knifeStattrak==="all"||(eligible(x)&&(knifeStattrak==="stattrak"?/StatTrak™/i.test(x.name):!/StatTrak™/i.test(x.name))))});if($("sort").value==="showcase"&&!q){
+function filter(){let q=searchPortuguese($("search").value);q=q.replace(/\b(?:faze|fase|phase|p)\s*([1-4])\b/g,"phase $1").replace(/\b(?:faze|fase)\b/g,"phase");const terms=q.split(/\s+/).filter(Boolean),cat=$("category").value;const eligible=x=>["Facas","Rifles","Pesadas","Submetralhadoras","Pistolas","Zeus","Armas e skins"].includes(x._category);const matching=items.filter(x=>storefrontItemVisible(x)&&matchesSearch(x,terms)&&categoryMatches(x,cat));if(cat!==previousRarityCategory){selectedTypes.clear();selectedRarities.clear();selectedExtras.clear();selectedWears.clear();floatMin="";floatMax="";$("sideFloatMin").value="";$("sideFloatMax").value="";previousRarityCategory=cat;}updateRaritySidebar(cat,matching);const showStattrak=(["Facas","Rifles","Pesadas","Submetralhadoras","Pistolas","Zeus","Armas e skins"].includes(cat)||Boolean(q&&matching.some(eligible)))&&matching.some(x=>eligible(x)&&/StatTrak™/i.test(x.name));$("stattrakWrap").hidden=!showStattrak;if(!showStattrak)$("knifeStattrak").value="all";const knifeStattrak=$("knifeStattrak").value;visible=matching.filter(x=>{return (!selectedTypes.size||selectedTypes.has(x._category))&&(!selectedRarities.size||selectedRarities.has(rarityKey(x)))&&(!selectedExtras.size||selectedExtras.has(extraType(x)))&&(!selectedWears.size||!!(wearOf(x)&&selectedWears.has(wearOf(x).key)))&&((floatMin===""&&floatMax==="")||!!(wearOf(x)&&wearOf(x).max>=(floatMin===""?0:Number(floatMin))&&wearOf(x).min<=(floatMax===""?1:Number(floatMax))))&&(knifeStattrak==="all"||(eligible(x)&&(knifeStattrak==="stattrak"?/StatTrak™/i.test(x.name):!/StatTrak™/i.test(x.name))));;if($("sort").value==="showcase"&&q){visible=mixedFirst80(visible);}else if($("sort").value==="showcase"){
  if(cat||knifeStattrak!=="all"){visible=showcaseOrder(visible);}else{
  visible=showcaseOrder(visible);
  const isKnifeGlove=x=>x._category==="Facas"||x._category==="Luvas";
@@ -689,6 +723,6 @@ $("buyerSteam").addEventListener("input",()=>{$("buyerSteam").setCustomValidity(
 $("checkoutForm").onsubmit=e=>{e.preventDefault();if(!e.target.reportValidity())return;const steamValue=$("buyerSteam").value.trim();let validTrade=false;try{const u=new URL(steamValue);validTrade=u.protocol==="https:"&&u.hostname==="steamcommunity.com"&&u.pathname.replace(/\/$/,"")==="/tradeoffer/new"&&/^\d+$/.test(u.searchParams.get("partner")||"")&&/^[A-Za-z0-9_-]+$/.test(u.searchParams.get("token")||"");}catch(_){}if(!validTrade){$("buyerSteam").setCustomValidity("Insira seu Trade Link Steam completo com partner e token.");$("buyerSteam").reportValidity();return;}$("buyerSteam").setCustomValidity("");const digits=$("buyerPhone").value.replace(/\D/g,"");if(digits.length<10||digits.length>13){alert("Confira o WhatsApp com DDD.");return;}if(!checkoutEntries().length||checkoutTotals().missing){alert("Revise os itens do carrinho.");return;}const msg=checkoutMessage();const saved=CHECKOUT_WHATSAPP.replace(/\D/g,"");if(!/^55\d{10,11}$/.test(saved)){navigator.clipboard?.writeText(msg).then(()=>alert("Pedido copiado. O número comercial da loja precisa ser configurado para abrir o WhatsApp automaticamente.")).catch(()=>prompt("Copie a mensagem para o WhatsApp:",msg));return;}window.open("https://wa.me/"+saved+"?text="+encodeURIComponent(msg),"_blank","noopener,noreferrer");};
 
 $("grid").addEventListener("click",e=>{const add=e.target.closest("[data-cart-add]");if(add){addToCart(add.dataset.cartAdd);return;}const b=e.target.closest("[data-id]");if(b){const x=items.find(v=>v.id===b.dataset.id);if(x)openItem(x);}});
-$("grid").addEventListener("keydown",e=>{if(e.target.matches('.item[role="button"]')&&(e.key==="Enter"||e.key===" ")){e.preventDefault();const x=items.find(v=>v.id===e.target.dataset.id);if(x)openItem(x);}});$("close").onclick=()=>$("modal").close();$("more").onclick=append;["search","category","sort","knifeStattrak"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",filter));
-(async()=>{try{const res=await fetch(BASE);if(!res.ok)throw Error("HTTP "+res.status);const data=await res.json();items=normalize(data);if(!items.length)throw Error("Base vazia");$("category").insertAdjacentHTML("beforeend",broadCategories.map(c=>'<option value="'+safe(c)+'">'+safe(c)+'</option>').join(""));$("status").hidden=true;filter();loadPrices();loadYoupinListings();}catch(err){$("status").innerHTML='Não foi possível carregar o catálogo público. Verifique sua conexão e recarregue a página. <small>'+safe(err.message)+'</small>'; $("count").textContent="Catálogo temporariamente indisponível";}})();
+$("grid").addEventListener("keydown",e=>{if(e.target.matches('.item[role="button"]')&&(e.key==="Enter"||e.key===" ")){e.preventDefault();const x=items.find(v=>v.id===e.target.dataset.id);if(x)openItem(x);}});$("close").onclick=()=>$("modal").close();$("more").onclick=append;let searchFrame=0; $("search").addEventListener("input",()=>{cancelAnimationFrame(searchFrame);searchFrame=requestAnimationFrame(filter);});["category","sort","knifeStattrak"].forEach(id=>$(id).addEventListener("change",filter));
+(async()=>{try{const res=await fetch(BASE);if(!res.ok)throw Error("HTTP "+res.status);const data=await res.json();items=normalize(data);if(!items.length)throw Error("Base vazia");prepareSearchIndex();$("category").insertAdjacentHTML("beforeend",broadCategories.map(c=>'<option value="'+safe(c)+'">'+safe(c)+'</option>').join(""));$("status").hidden=true;filter();loadPrices();loadYoupinListings();}catch(err){$("status").innerHTML='Não foi possível carregar o catálogo público. Verifique sua conexão e recarregue a página. <small>'+safe(err.message)+'</small>'; $("count").textContent="Catálogo temporariamente indisponível";}})();
 </script></body></html>
