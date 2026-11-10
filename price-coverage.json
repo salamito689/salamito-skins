@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-11-10T11:21:48.489916+00:00",
+  "generated_at": "2026-11-10T19:49:45.814380+00:00",
   "note": "Diagnostic based on exact catalog names; categories are approximate and may include items hidden in storefront. Missing does not mean unavailable on YouPin.",
   "total_checked": 47529,
   "total_missing": 22399,
   "categories": {
     "Adesivos": {
       "checked": 22268,
-      "missing": 13350,
-      "priced": 8918,
+      "missing": 13349,
+      "priced": 8919,
       "examples_missing": [
         "Sticker | Shooter",
         "Sticker | Shooter (Foil)",
@@ -34,8 +34,8 @@
     },
     "Armas e skins": {
       "checked": 16917,
-      "missing": 5696,
-      "priced": 11221,
+      "missing": 5697,
+      "priced": 11220,
       "examples_missing": [
         "Souvenir AK-47 | AUTOEXEC (Factory New)",
         "Souvenir AK-47 | AUTOEXEC (Minimal Wear)",
