@@ -296,6 +296,8 @@ function searchPortuguese(input){
   [/\b(?:testada em campo|testado em campo|testada|testado)\b/g,"field tested"],
   [/\b(?:bem desgastada|bem desgastado|muito usada|muito usado)\b/g,"well worn"],
   [/\b(?:marcada por batalha|marcado por batalha|desgastada por batalha|desgastado por batalha)\b/g,"battle scarred"],
+  [/\b(?:sabedoria do dragao|conhecimento do dragao)\b/g,"dragon lore"],
+  [/\b(?:sabedoria|conhecimento)\b/g,"lore"],
   [/\b(?:baioneta m9)\b/g,"m9 bayonet"],
   [/\b(?:baioneta)\b/g,"bayonet"],
   [/\b(?:faca borboleta)\b/g,"butterfly knife"],
@@ -445,7 +447,7 @@ function prepareSearchIndex(){
 }
 function matchesSearch(x,terms){
  const hay=x._searchFast||"";
- return terms.every(t=>hay.includes(t));
+ return terms.every(t=>hay.split(" ").some(word=>word.startsWith(t)));
 }
 function mixedFirst80(list){
  if(list.length<2)return list;
