@@ -70,7 +70,7 @@ function storefrontItemVisible(x){
  if(priceMap&&fxCnyBrl>0){
   const minimum=x._category==="Chaveiros"?5
    :x._category==="Patches"?10
-   :(x._category==="Caixas e cápsulas"&&/(?:capsule|terminal)/i.test(String(x.name||"")+" "+String(x.market_hash_name||"")))?2:null;
+   :x._category==="Caixas e cápsulas"?2:null;
   if(minimum!==null){
    const amount=finalPrice(x);
    if(amount!==null&&Math.round((amount+Number.EPSILON)*100)<minimum*100)return false;
