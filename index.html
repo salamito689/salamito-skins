@@ -450,7 +450,7 @@ function matchesSearch(x,terms){
 function mixedFirst80(list){
  if(list.length<2)return list;
  // Select a diversified first page without changing the remaining catalog.
- const withPrices=list.map((x,i)=>({x,i,p:finalPrice(x),key:String(x.name||"").replace(/^★\\s*/,"").replace(/^StatTrak™\\s*/,"").replace(/\\s*\\((?:Factory New|Minimal Wear|Field-Tested|Well-Worn|Battle-Scarred)\\)$/i,"").replace(/\\s*\\((?:Phase [1-4]|Ruby|Sapphire|Emerald|Black Pearl)\\)$/i,"").toLowerCase()}));
+ const withPrices=list.map((x,i)=>({x,i,p:finalPrice(x),key:String(x.name||"").replace(/^★\s*/,"").replace(/^StatTrak™\s*/,"").replace(/\s*\((?:Factory New|Minimal Wear|Field-Tested|Well-Worn|Battle-Scarred)\)$/i,"").replace(/\s*\((?:Phase [1-4]|Ruby|Sapphire|Emerald|Black Pearl)\)$/i,"").toLowerCase()}));
  const known=withPrices.filter(e=>e.p!==null&&Number.isFinite(e.p)).sort((a,b)=>a.p-b.p);
  const cut1=known[Math.floor(known.length/3)]?.p??0,cut2=known[Math.floor(known.length*2/3)]?.p??Infinity;
  const tiers=[[],[],[]];
