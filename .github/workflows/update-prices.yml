@@ -16,7 +16,8 @@ jobs:
           python-version: '3.12'
       - name: Consultar preços públicos
         run: python scripts/update_prices.py
-      - name: Atualizar cotação Wise ou fonte alternativa identificada
+      - name: Atualizar cotação exclusivamente pela Wise
+        continue-on-error: true # Sem token, não substitui por outro câmbio; preços-base continuam atualizando.
         env:
           WISE_API_TOKEN: ${{ secrets.WISE_API_TOKEN }}
         run: python scripts/update_fx.py
