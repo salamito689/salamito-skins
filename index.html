@@ -161,8 +161,10 @@ function finalPrice(x){
 }
 function priceMarkup(x){
  const amount=finalPrice(x);
- if(requiresVariantPrice(x)&&amount===null)return '<div class="market-price"><small>Item possivelmente com baixa liquidez. Consultar preços na dm!</small></div>';
- if(amount===null)return '<div class="market-price"><small>Item possivelmente com baixa liquidez. Consultar preços na dm!</small></div>';
+ if(amount===null){
+  const reason=!(fxCnyBrl>0)?"Cotação indisponível · consultar valor no atendimento":(!priceMap?"Preços temporariamente indisponíveis · consultar atendimento":"Sem preço de referência · consultar atendimento");
+  return '<div class="market-price"><small>'+reason+'</small></div>';
+ }
  return '<div class="market-price"><strong>'+brl(amount)+'</strong><small>'+(fxStale?'Cotação desatualizada · confirmar antes da compra':(requiresVariantPrice(x)?'Referência Buff163 · '+safe(dopplerVariant(x))+' · estimativa':'Preço estimado Salamito · sujeito à confirmação'))+'</small></div>';
 }
 function paintPrices(){
@@ -170,7 +172,7 @@ function paintPrices(){
   const x=items.find(v=>v.id===el.dataset.id);if(!x)return;
   el.querySelector(".market-price")?.remove();
   const html=priceMarkup(x);
-  if(html)el.querySelector(".chip")?.insertAdjacentHTML("beforebegin",html);
+  if(html)el.querySelector(".chip")?.insertAdjacentHTML("afterend",html);
  });
 
 }
@@ -181,6 +183,7 @@ async function loadPrices(){
    fetch("fx.json?t="+Math.floor(Date.now()/300000),{signal:AbortSignal.timeout(12000)}).then(r=>{if(!r.ok)throw Error("Câmbio HTTP "+r.status);return r.json();})
   ]);
   if(fx.status==="fulfilled")acceptFx(fx.value);
+  if(!(fxCnyBrl>0))priceError="Cotação não disponível";
   if(prices.status!=="fulfilled"||!prices.value?.prices)throw Error("Aguardando primeira atualização automática dos preços no GitHub");
   priceMap=prices.value.prices;phasePriceMap=prices.value.phase_prices||{};priceTimestamp=prices.value.source_updated_at||prices.value.fetched_at||null;
   priceError="";filter();paintPrices();
