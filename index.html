@@ -46,7 +46,21 @@ if(x.weapon)return weaponCategory(x);
 return "Outros itens";
 }
 const DOPPLER_PAINTS=Object.freeze({"415":"Ruby","416":"Sapphire","417":"Black Pearl","418":"Phase 1","419":"Phase 2","420":"Phase 3","421":"Phase 4","568":"Emerald","569":"Phase 1","570":"Phase 2","571":"Phase 3","572":"Phase 4"});
-function dopplerVariant(x){const n=String(x.name||"");if(!/doppler/i.test(n))return "";const index=String(x.paint_index??x.paintIndex??x.paint?.index??"").trim();const v=DOPPLER_PAINTS[index];if(!v)return "";if(index>="568"&&index<="572"&&!/gamma doppler/i.test(n))return "";if(index>="415"&&index<="421"&&/gamma doppler/i.test(n))return "";return v;}
+function dopplerVariant(x){
+ const n=String(x.name||"");
+ if(!/doppler/i.test(n))return "";
+ // The catalog publishes a dedicated 'phase' field. Prefer it over paint-index inference.
+ const raw=String(x.phase?.name??x.phase??"").trim();
+ const m=raw.match(/(?:phase\\s*([1-4])|ruby|sapphire|black pearl|emerald)/i);
+ if(m)return m[1]?"Phase "+m[1]:({"ruby":"Ruby","sapphire":"Sapphire","black pearl":"Black Pearl","emerald":"Emerald"})[m[0].toLowerCase()];
+ const index=String(x.paint_index??x.paintIndex??x.paint?.index??"").trim();
+ const v=DOPPLER_PAINTS[index];
+ if(!v)return "";
+ const number=Number(index);
+ if(number>=568&&number<=572&&!/gamma doppler/i.test(n))return "";
+ if(number>=415&&number<=421&&/gamma doppler/i.test(n))return "";
+ return v;
+}
 function displayName(x){const variant=dopplerVariant(x);if(!variant)return x.name;const n=String(x.name);if(n.toLowerCase().includes(variant.toLowerCase()))return n;const pos=n.lastIndexOf(" (");if(pos>=0&&n.endsWith(")"))return n.slice(0,pos)+" — "+variant+n.slice(pos);return n+" — "+variant;}
 function normalize(obj){return Object.entries(obj).map(([id,x])=>{const y={...x,id:x.id||id};y._category=categoryOf(y);y._displayName=displayName(y);y._search=(y.name+" "+y._displayName+" "+(y.market_hash_name||"")+" "+y._category).toLocaleLowerCase();return y;}).filter(x=>x.name&&x.image&&!/^key-/.test(String(x.id).toLowerCase())&&!/^Stars for Operation$/i.test(String(x.type||""))&&!/^Souvenir Token$/i.test(String(x.type||""))&&!/^(?:\d+\s+)?Stars? for Operation\b/i.test(x.name)&&!/^.+ Souvenir Token$/i.test(x.name)&&x._category!=="Chaves"&&(x._category!=="Outros itens"||Boolean(x.market_hash_name))&& !/sticker\s*slab/i.test(String(x.name||"")+" "+String(x.market_hash_name||"")+" "+String(x.type?.name||""))&&["Facas","Luvas","Rifles","Pesadas","Submetralhadoras","Pistolas","Zeus","Armas e skins","Agentes","Pins","Outros itens","Chaveiros","Adesivos","Patches","Grafites","Kits de música","Caixas e cápsulas"].includes(x._category));}
 function isRealKnifeGlove(x){
