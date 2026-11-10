@@ -288,6 +288,43 @@ function showcaseOrder(list){
  }
  return front.concat(result.filter(x=>!selected.has(x.id)));
 }
+function diverseShowcase(list){
+ // Only affect the default showcase, never explicit price/name sorting.
+ // Spread different finishes and price ranges through the first 80 cards.
+ const buckets=new Map();
+ const keyOf=x=>{
+  const n=String(x.name||"").replace(/^★\s*/,"").replace(/^StatTrak™\s*/,"");
+  const base=n.replace(/\s*\((?:Factory New|Minimal Wear|Field-Tested|Well-Worn|Battle-Scarred)\)$/i,"");
+  const finish=(base.split("|")[1]||base).trim().replace(/\s*\((?:Phase [1-4]|Ruby|Sapphire|Emerald|Black Pearl)\)$/i,"").trim().toLowerCase();
+  return finish;
+ };
+ for(const x of list){const k=keyOf(x);if(!buckets.has(k))buckets.set(k,[]);buckets.get(k).push(x);}
+ const entries=[...buckets.entries()].map(([key,arr])=>({key,arr,at:0}));
+ // Keep finish diversity and rotate among affordable, midrange and premium.
+ for(const e of entries)e.arr.sort((a,b)=>(finalPrice(a)??Infinity)-(finalPrice(b)??Infinity));
+ const prices=list.map(finalPrice).filter(p=>p!==null&&Number.isFinite(p)).sort((a,b)=>a-b);
+ const low=prices[Math.floor(prices.length*.33)]??0,high=prices[Math.floor(prices.length*.67)]??Infinity;
+ const tier=x=>{const p=finalPrice(x);return p===null?1:p<=low?0:p>=high?2:1;};
+ const queues=[[],[],[]];
+ for(const e of entries){
+  for(let i=0;i<e.arr.length;i++){const x=e.arr[i];queues[tier(x)].push({x,key:e.key});}
+ }
+ const used=new Set(),lastKeys=[],out=[],tierOrder=[0,2,1,0,1,2];
+ let turn=0;
+ while(out.length<list.length){
+  let picked=null;
+  for(let k=0;k<3&&!picked;k++){
+   const q=queues[tierOrder[(turn+k)%tierOrder.length]];
+   let idx=q.findIndex(v=>!used.has(v.x.id)&&!lastKeys.includes(v.key));
+   if(idx<0)idx=q.findIndex(v=>!used.has(v.x.id));
+   if(idx>=0)picked=q.splice(idx,1)[0];
+  }
+  if(!picked)break;
+  if(used.has(picked.x.id))continue;
+  out.push(picked.x);used.add(picked.x.id);lastKeys.push(picked.key);if(lastKeys.length>5)lastKeys.shift();turn++;
+ }
+ return out.length===list.length?out:list;
+}
 function searchPortuguese(input){
  let q=fold(input);
  const phrases=[
@@ -522,8 +559,8 @@ $("raritySidebar").addEventListener("change",e=>{
 });
 $("clearRarity").addEventListener("click",()=>{selectedTypes.clear();selectedRarities.clear();selectedExtras.clear();selectedWears.clear();floatMin="";floatMax="";$("sideFloatMin").value="";$("sideFloatMax").value="";$("category").value="";$("knifeStattrak").value="all";filter();});
 function filter(){let q=searchPortuguese($("search").value);q=q.replace(/\b(?:faze|fase|phase|p)\s*([1-4])\b/g,"phase $1").replace(/\b(?:faze|fase)\b/g,"phase");const terms=q.split(/\s+/).filter(Boolean),cat=$("category").value;const eligible=x=>["Facas","Rifles","Pesadas","Submetralhadoras","Pistolas","Zeus","Armas e skins"].includes(x._category);const matching=items.filter(x=>storefrontItemVisible(x)&&matchesSearch(x,terms)&&categoryMatches(x,cat));if(cat!==previousRarityCategory){selectedTypes.clear();selectedRarities.clear();selectedExtras.clear();selectedWears.clear();floatMin="";floatMax="";$("sideFloatMin").value="";$("sideFloatMax").value="";previousRarityCategory=cat;}updateRaritySidebar(cat,matching);const showStattrak=(["Facas","Rifles","Pesadas","Submetralhadoras","Pistolas","Zeus","Armas e skins"].includes(cat)||Boolean(q&&matching.some(eligible)))&&matching.some(x=>eligible(x)&&/StatTrak™/i.test(x.name));$("stattrakWrap").hidden=!showStattrak;if(!showStattrak)$("knifeStattrak").value="all";const knifeStattrak=$("knifeStattrak").value;visible=items.filter(x=>{if(!storefrontItemVisible(x))return false;const hay=fold(x._search);const knifeName=fold(x.name).replace(/^(stattrak|souvenir) /,"");const knifeModels=/^(bayonet|bowie knife|butterfly knife|classic knife|falchion knife|flip knife|gut knife|huntsman knife|karambit|kukri knife|m9 bayonet|navaja knife|nomad knife|paracord knife|shadow daggers|skeleton knife|stiletto knife|survival knife|talon knife|ursus knife)(?:$|\s)/;const isPlainKnife=knifeModels.test(knifeName)&&!x.name.includes("|")&&!x.name.includes(" | ");return terms.every(t=>(isPlainKnife&&"vanilla".startsWith(t)&&t.length>=1)||hay.includes(t)||fold(gloveSearchAliases(x)+" "+knifeSearchAliases(x)).includes(t))&&categoryMatches(x,cat)&&(!selectedTypes.size||selectedTypes.has(x._category))&&(!selectedRarities.size||selectedRarities.has(rarityKey(x)))&&(!selectedExtras.size||selectedExtras.has(extraType(x)))&&(!selectedWears.size||!!(wearOf(x)&&selectedWears.has(wearOf(x).key)))&&((floatMin===""&&floatMax==="")||!!(wearOf(x)&&wearOf(x).max>=(floatMin===""?0:Number(floatMin))&&wearOf(x).min<=(floatMax===""?1:Number(floatMax))))&&(knifeStattrak==="all"||(eligible(x)&&(knifeStattrak==="stattrak"?/StatTrak™/i.test(x.name):!/StatTrak™/i.test(x.name))))});if($("sort").value==="showcase"&&!q){
- if(cat||knifeStattrak!=="all"){visible=showcaseOrder(visible);}else{
- visible=showcaseOrder(visible);
+ if(cat||knifeStattrak!=="all"){visible=diverseShowcase(visible);}else{
+ visible=diverseShowcase(showcaseOrder(visible));
  const isKnifeGlove=x=>x._category==="Facas"||x._category==="Luvas";
  const isDeferred=x=>x._category==="Adesivos"||x._category==="Grafites"||/autograph capsule/i.test(x.name);
  const eligible=visible.filter(x=>!isDeferred(x)),deferred=visible.filter(isDeferred);
@@ -689,6 +726,6 @@ $("buyerSteam").addEventListener("input",()=>{$("buyerSteam").setCustomValidity(
 $("checkoutForm").onsubmit=e=>{e.preventDefault();if(!e.target.reportValidity())return;const steamValue=$("buyerSteam").value.trim();let validTrade=false;try{const u=new URL(steamValue);validTrade=u.protocol==="https:"&&u.hostname==="steamcommunity.com"&&u.pathname.replace(/\/$/,"")==="/tradeoffer/new"&&/^\d+$/.test(u.searchParams.get("partner")||"")&&/^[A-Za-z0-9_-]+$/.test(u.searchParams.get("token")||"");}catch(_){}if(!validTrade){$("buyerSteam").setCustomValidity("Insira seu Trade Link Steam completo com partner e token.");$("buyerSteam").reportValidity();return;}$("buyerSteam").setCustomValidity("");const digits=$("buyerPhone").value.replace(/\D/g,"");if(digits.length<10||digits.length>13){alert("Confira o WhatsApp com DDD.");return;}if(!checkoutEntries().length||checkoutTotals().missing){alert("Revise os itens do carrinho.");return;}const msg=checkoutMessage();const saved=CHECKOUT_WHATSAPP.replace(/\D/g,"");if(!/^55\d{10,11}$/.test(saved)){navigator.clipboard?.writeText(msg).then(()=>alert("Pedido copiado. O número comercial da loja precisa ser configurado para abrir o WhatsApp automaticamente.")).catch(()=>prompt("Copie a mensagem para o WhatsApp:",msg));return;}window.open("https://wa.me/"+saved+"?text="+encodeURIComponent(msg),"_blank","noopener,noreferrer");};
 
 $("grid").addEventListener("click",e=>{const add=e.target.closest("[data-cart-add]");if(add){addToCart(add.dataset.cartAdd);return;}const b=e.target.closest("[data-id]");if(b){const x=items.find(v=>v.id===b.dataset.id);if(x)openItem(x);}});
-$("grid").addEventListener("keydown",e=>{if(e.target.matches('.item[role="button"]')&&(e.key==="Enter"||e.key===" ")){e.preventDefault();const x=items.find(v=>v.id===e.target.dataset.id);if(x)openItem(x);}});$("close").onclick=()=>$("modal").close();$("more").onclick=append;["search","category","sort","knifeStattrak"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",filter));
+$("grid").addEventListener("keydown",e=>{if(e.target.matches('.item[role="button"]')&&(e.key==="Enter"||e.key===" ")){e.preventDefault();const x=items.find(v=>v.id===e.target.dataset.id);if(x)openItem(x);}});$("close").onclick=()=>$("modal").close();$("more").onclick=append;let searchDelay; $("search").addEventListener("input",()=>{clearTimeout(searchDelay);searchDelay=setTimeout(filter,140);});["category","sort","knifeStattrak"].forEach(id=>$(id).addEventListener("change",filter));
 (async()=>{try{const res=await fetch(BASE);if(!res.ok)throw Error("HTTP "+res.status);const data=await res.json();items=normalize(data);if(!items.length)throw Error("Base vazia");$("category").insertAdjacentHTML("beforeend",broadCategories.map(c=>'<option value="'+safe(c)+'">'+safe(c)+'</option>').join(""));$("status").hidden=true;filter();loadPrices();loadYoupinListings();}catch(err){$("status").innerHTML='Não foi possível carregar o catálogo público. Verifique sua conexão e recarregue a página. <small>'+safe(err.message)+'</small>'; $("count").textContent="Catálogo temporariamente indisponível";}})();
 </script></body></html>
