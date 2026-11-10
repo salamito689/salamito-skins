@@ -56,56 +56,29 @@
 .hero-art:after{content:""!important;display:block!important;position:absolute!important;inset:0!important;pointer-events:none!important;background:linear-gradient(90deg,#06152d 0%,rgba(6,21,45,.65) 12%,transparent 32%,transparent 62%,rgba(6,21,45,.72) 85%,#06152d 100%),linear-gradient(0deg,#06152d 0%,transparent 15%,transparent 85%,#06152d 100%),rgba(6,21,45,.12)!important}
 .hero-inner{position:relative!important;z-index:1!important}
 }
-</style><style id="hero-zoom-responsive-v15">
-/* Browser zoom reduces the CSS viewport: keep copy and artwork in separate columns. */
-@media (min-width:781px) and (max-width:1250px){
-.hero-inner{grid-template-columns:minmax(0,48%) minmax(0,52%)!important;gap:0!important}
-.hero-inner>div:first-child{min-width:0!important;max-width:100%!important}
-.hero h1{font-size:clamp(30px,4.1vw,49px)!important;overflow-wrap:normal!important}
-.hero-inner p{max-width:100%!important}
-.hero .actions{max-width:100%!important}
-.hero-art{left:51%!important}
-}
-@media (max-width:780px){
-.hero-inner{grid-template-columns:1fr!important}
-.hero-art{position:relative!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;min-height:240px!important}
-}
-</style><style id="hero-zoom-layout-v16">
-/* At browser zoom, the knife becomes a real grid item rather than a page overlay. */
-@media (min-width:781px) and (max-width:1450px){
-.hero{height:auto!important;min-height:0!important;overflow:hidden!important}
-.hero:before,.hero:after{display:none!important}
-.hero-inner{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:16px!important;align-items:center!important;min-height:0!important;padding-top:42px!important;padding-bottom:42px!important}
-.hero-inner>div:first-child{position:relative!important;z-index:2!important;min-width:0!important}
-.hero h1{font-size:clamp(30px,3.7vw,54px)!important;line-height:1.1!important}
-.hero .lead{font-size:clamp(14px,1.35vw,18px)!important}
-.hero-art{position:relative!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;min-width:0!important;width:100%!important;height:clamp(230px,30vw,420px)!important;min-height:0!important;z-index:0!important;overflow:hidden!important}
-.hero-art:before{inset:0!important;background-position:center center!important;background-size:contain!important}
-.hero-art:after{inset:0!important}
-}
-@media (max-width:780px){
-.hero:before,.hero:after{display:none!important}
-.hero-art{width:100%!important;overflow:hidden!important}
-}
-</style><style id="hero-image-edge-fix-v17">
-/* Fade the actual image rectangle on all four sides at every browser zoom. */
+</style><style id="hero-proportional-layout-v19">
+/* Hero content and art share one bounded layout at every desktop viewport width. */
 @media(min-width:781px){
-.hero-art:before{
--webkit-mask-image:radial-gradient(ellipse 62% 70% at 55% 50%,#000 45%,rgba(0,0,0,.9) 61%,rgba(0,0,0,.4) 77%,transparent 100%)!important;
-mask-image:radial-gradient(ellipse 62% 70% at 55% 50%,#000 45%,rgba(0,0,0,.9) 61%,rgba(0,0,0,.4) 77%,transparent 100%)!important;
+.hero{position:relative!important;isolation:isolate!important;overflow:hidden!important;background:#06152d!important;height:auto!important;min-height:0!important}
+.hero:before,.hero:after{content:none!important;display:none!important}
+.hero-inner{position:relative!important;z-index:1!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1.18fr)!important;gap:clamp(16px,2.5vw,45px)!important;align-items:center!important;box-sizing:border-box!important;width:calc(100% - 48px)!important;max-width:1320px!important;min-height:390px!important;margin:0 auto!important;padding:45px 20px!important}
+.hero-inner>div:first-child{position:relative!important;z-index:2!important;min-width:0!important;max-width:520px!important}
+.hero h1{font-size:clamp(32px,3.25vw,59px)!important;line-height:1.09!important}
+.hero .lead{max-width:500px!important}
+.hero-art{position:relative!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;display:block!important;visibility:visible!important;z-index:0!important;justify-self:stretch!important;box-sizing:border-box!important;width:100%!important;height:clamp(270px,25vw,380px)!important;min-height:0!important;overflow:hidden!important;background:none!important;border:0!important;box-shadow:none!important;pointer-events:none!important}
+.hero-art:before{content:""!important;display:block!important;position:absolute!important;inset:0!important;transform:none!important;background:url("assets/kara%20site.png") center center/contain no-repeat!important;-webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.35) 12%,#000 30%,#000 78%,transparent 100%)!important;mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.35) 12%,#000 30%,#000 78%,transparent 100%)!important}
+.hero-art:after{content:""!important;display:block!important;position:absolute!important;inset:0!important;pointer-events:none!important;background:linear-gradient(0deg,#06152d 0%,transparent 16%,transparent 84%,#06152d 100%)!important}
+.hero-art .hero-visual,.hero-art .hero-caption{display:none!important}
 }
-.hero-art:after{background:linear-gradient(90deg,#06152d 0%,transparent 19%,transparent 80%,#06152d 100%),linear-gradient(0deg,#06152d 0%,transparent 18%,transparent 83%,#06152d 100%)!important}
+@media(min-width:781px) and (max-width:1050px){
+.hero-inner{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;min-height:320px!important;padding:28px 12px!important}
+.hero h1{font-size:clamp(29px,3.8vw,42px)!important}
+.hero-art{height:clamp(230px,31vw,320px)!important}
 }
-</style><style id="hero-zoom-out-v18">
-/* Zooming out increases CSS viewport width. Keep hero art attached to the
-   same centered content canvas instead of the full browser viewport. */
-@media (min-width:2000px){
-.hero{background:#06152d!important;overflow:hidden!important}
+@media(max-width:780px){
 .hero:before,.hero:after{display:none!important}
-.hero-inner{position:relative!important;display:grid!important;grid-template-columns:minmax(0,530px) minmax(0,1fr)!important;gap:40px!important;width:100%!important;max-width:none!important;min-height:400px!important;margin:0!important;padding:38px clamp(35px,5.5vw,115px) 40px!important;align-items:center!important}
-.hero-inner>div:first-child{position:relative!important;z-index:2!important;min-width:0!important}
-.hero-art{position:relative!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;justify-self:end!important;z-index:0!important;width:min(100%,950px)!important;height:350px!important;min-height:0!important;overflow:hidden!important}
- .hero-art:before{inset:0!important;background-position:right center!important;background-size:contain!important}
-.hero-art:after{inset:0!important}
+.hero-inner{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
+.hero-art{position:relative!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;width:100%!important;height:260px!important;min-height:0!important}
+.hero-art:before{background:url("assets/kara%20site.png") center/contain no-repeat!important}
 }
 </style></head><body><header><div class="container nav"><a class="brand" href="#inicio">Salamito<span class="skin">Skins</span></a><nav class="links"><a href="#inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10h-6v-6H9v6H3z"/></svg>Início</a><a href="catalogo.html"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Catálogo</a><a href="#sobre"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/></svg>Sobre</a><a href="#feedbacks"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H8l-4 4z"/><path d="M8 9h8m-8 4h5"/></svg>Feedbacks</a></nav></div></header><main><div class="hero" id="inicio"><div class="container hero-inner"><div><div class="eyebrow">CS2 SKINS • COMPRA E VENDA</div><h1>Sua próxima skin favorita <span>está aqui.</span></h1><p class="lead">Explore skins de Counter-Strike 2 com atendimento direto, transparência e a experiência de quem vive esse mercado.</p><div class="actions"><a class="btn" href="catalogo.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Explorar catálogo</a><a class="btn secondary" href="https://www.instagram.com/salamitoskins/" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>Vender minhas skins</a></div></div><div class="hero-art"><svg class="hero-visual" viewBox="0 0 640 480" role="img" aria-label="Ilustração de uma Karambit azul e uma caixa de skins"><defs><linearGradient id="blade" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a8ecff"/><stop offset=".26" stop-color="#1bb7ff"/><stop offset=".56" stop-color="#2943e6"/><stop offset="1" stop-color="#07144d"/></linearGradient><linearGradient id="case" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#1a4278"/><stop offset="1" stop-color="#09152b"/></linearGradient><radialGradient id="glow"><stop stop-color="#2a8dff" stop-opacity=".6"/><stop offset="1" stop-color="#0b3b8d" stop-opacity="0"/></radialGradient></defs><ellipse cx="340" cy="230" rx="280" ry="220" fill="url(#glow)"/><g transform="translate(330 255) rotate(15)"><rect x="-90" y="-55" width="210" height="155" rx="16" fill="url(#case)" stroke="#447fc6" stroke-width="5"/><path d="M-90 -14H120M-40 -55V100M68 -55V100" stroke="#2a5b9b" stroke-width="7"/><rect x="-34" y="-7" width="94" height="52" rx="9" fill="#0b254e" stroke="#4da4f4" stroke-width="3"/><text x="13" y="24" text-anchor="middle" font-size="20" font-weight="bold" fill="#a9dbff">CS2</text></g><g transform="translate(85 25) rotate(-12 280 210)"><path d="M95 267C118 107 280 60 407 104C468 125 494 169 490 218C451 170 406 146 357 150C266 156 211 226 185 290Z" fill="url(#blade)" stroke="#8ddcff" stroke-width="5"/><path d="M178 285L285 323L265 355L164 318Z" fill="#151d31" stroke="#7b94b4" stroke-width="5"/><path d="M184 297L267 326" stroke="#52b8ff" stroke-width="6"/><circle cx="289" cy="338" r="30" fill="#07152e" stroke="#7d9fcb" stroke-width="12"/><circle cx="289" cy="338" r="14" fill="#16335c"/></g><g fill="#63c6ff"><circle cx="128" cy="99" r="3"/><circle cx="542" cy="110" r="4"/><circle cx="506" cy="369" r="3"/><circle cx="91" cy="380" r="2"/></g></svg><div class="hero-caption">COUNTER-STRIKE 2 • SKINS</div></div></div></div><section><div class="container"><div class="section-heading"><div class="eyebrow">Por que escolher a Salamito?</div><h2>Mais que skins, <span class="accent">confiança.</span></h2></div><div class="features"><article class="feature"><div class="symbol">🎯</div><h3>Experiência</h3><p>Conhecimento do mercado de skins e atenção aos detalhes de cada negociação.</p></article><article class="feature"><div class="symbol">🛡️</div><h3>Segurança e transparência</h3><p>Negociações conduzidas com clareza e comunicação direta.</p></article><article class="feature"><div class="symbol">💬</div><h3>Atendimento direto</h3><p>Converse com quem está por trás da loja para encontrar a skin ideal.</p></article></div></div></section><section class="about" id="sobre"><div class="container about-grid"><div><img class="portrait" src="assets/foto-saimon-original.jpeg" alt="Fotografia original do fundador da Salamito Skins"><p class="muted" style="font-size:11px">Foto original — publicação do arquivo pendente</p></div><div class="about-copy"><div class="eyebrow">Conheça quem está por trás da</div><h2>Salamito<span class="accent">Skins</span></h2><p>Sou o Saimon, jogador de CS2 e apaixonado pelo mercado de skins. Aqui você negocia diretamente comigo, com foco em segurança, transparência e atendimento personalizado.</p><div class="about-social"><a class="btn" href="https://www.instagram.com/salamitoskins/" target="_blank" rel="noopener noreferrer">◎ Falar comigo no Instagram</a><a class="btn secondary" href="https://steamcommunity.com/" target="_blank" rel="noopener noreferrer">Ver Steam</a></div></div><div class="about-points"><div class="about-point"><span class="p-icon">↗</span><div><strong>Experiência de mercado</strong><small>Conhecimento do mercado de skins de CS2.</small></div></div><div class="about-point"><span class="p-icon">♢</span><div><strong>Segurança e transparência</strong><small>Negociações claras e atendimento direto.</small></div></div><div class="about-point"><span class="p-icon">▤</span><div><strong>Atendimento direto</strong><small>Converse comigo, sem intermediários.</small></div></div></div></div></section><section id="feedbacks"><div class="container"><div class="section-heading"><div class="eyebrow">Depoimentos de clientes</div><h2>Quem negocia com a Salamito <span class="accent">compartilha.</span></h2><p>Espaço para comentários reais publicados no Instagram. Aguardando confirmação dos textos originais.</p></div><div class="reviews"><article class="review"><div class="handle">arthurzanella_ <span style="float:right">◎</span></div><p>Comentário original a verificar antes da publicação.</p><small>Instagram • conteúdo pendente</small></article><article class="review"><div class="handle">lucas.wz7 <span style="float:right">◎</span></div><p>Comentário original a verificar antes da publicação.</p><small>Instagram • conteúdo pendente</small></article><article class="review"><div class="handle">guistn_ <span style="float:right">◎</span></div><p>Comentário original a verificar antes da publicação.</p><small>Instagram • conteúdo pendente</small></article><article class="review"><div class="handle">pedrohenriqsz <span style="float:right">◎</span></div><p>Comentário original a verificar antes da publicação.</p><small>Instagram • conteúdo pendente</small></article></div><p style="text-align:right"><a href="https://www.instagram.com/salamitoskins/" target="_blank" rel="noopener noreferrer">Ver mais no Instagram →</a></p></div></section></main><footer>© Salamito Skins • CS2 Skins</footer></body></html>
