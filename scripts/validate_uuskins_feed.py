@@ -35,6 +35,7 @@ def main():
         wear = row.get("float")
         assert wear is None or (type(wear) in (int, float) and math.isfinite(wear) and 0 <= wear <= 1), "Invalid float"
         assert type(row.get("inspect_available")) is bool, "Invalid inspect availability flag"
+        assert row.get("inspect_format") in ("hex_payload", "legacy_asset", "unknown", "missing", "unsupported"), "Invalid inspect format"
         for key in ("paint_seed", "paint_index"):
             value = row.get(key)
             assert value is None or (type(value) is int and 0 <= value <= 100000), f"Invalid {key}"
