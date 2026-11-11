@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import urllib.request
 import urllib.error
+from urllib.parse import urlparse
 from datetime import datetime, timezone
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -26,9 +27,22 @@ def describe(obj, depth=0):
                 "first": describe(obj[0], depth + 1) if obj else None}
     return {"type": type(obj).__name__}
 
+def inspect_metadata(row):
+    """Describe inspect-link presence without exporting asset identifiers or tokens."""
+    link = row.get("inspectUrl") or row.get("inspect_url")
+    if not isinstance(link, str) or not link.strip():
+        return {"inspect_available": False, "inspect_scheme": None, "inspect_host": None}
+    parsed = urlparse(link.strip())
+    allowed_scheme = parsed.scheme.lower() in ("steam", "https")
+    return {
+        "inspect_available": bool(allowed_scheme and parsed.netloc),
+        "inspect_scheme": parsed.scheme.lower() if allowed_scheme else "unsupported",
+        "inspect_host": parsed.hostname.lower()[:100] if parsed.hostname and parsed.scheme.lower() == "https" else None,
+    }
+
 def safe_samples(obj):
     if isinstance(obj, list):
-        return [{k: v for k, v in row.items() if k in ALLOWED and isinstance(v, (str, int, float, bool)) and len(str(v)) < 150}
+        return [{**{k: v for k, v in row.items() if k in ALLOWED and isinstance(v, (str, int, float, bool)) and len(str(v)) < 150}, **inspect_metadata(row)}
                 for row in obj[:20] if isinstance(row, dict)]
     if isinstance(obj, dict):
         for key in ("items", "list", "records", "skuList", "sku_list"):
