@@ -38,6 +38,17 @@ class TestSelector(unittest.TestCase):
         self.assertEqual([r["id"] for r in selector.select_listings(rows, name, 0, .07, "Phase 1")], ["1"])
         self.assertEqual([r["id"] for r in selector.select_listings(rows, name, 0, .07, "Phase 3")], ["2"])
 
+    def test_global_cheapest_fails_closed_without_full_coverage(self):
+        rows = [self.row(1, .16, 10)]
+        name = "★ Bayonet | Autotronic (Field-Tested)"
+        for coverage in (None, {}, {"scope": "first_returned_batch_per_model",
+                                     "global_cheapest_verified": False,
+                                     "source_pagination_verified": False}):
+            with self.subTest(coverage=coverage), self.assertRaisesRegex(ValueError, "Complete market coverage"):
+                selector.select_listings(rows, name, .15, .18,
+                                         require_complete=True, coverage=coverage)
+        self.assertEqual(len(selector.select_listings(rows, name, .15, .18)), 1)
+
     def test_float_boundary_and_invalids(self):
         rows = [self.row("a", .18, 5), self.row("b", None, 1), self.row("c", .16, float("nan"))]
         self.assertEqual(selector.select_listings(rows, "★ Bayonet | Autotronic (Field-Tested)", .15, .18), [])
