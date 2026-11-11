@@ -34,6 +34,7 @@ def main():
         assert type(price) in (int, float) and math.isfinite(price) and 0 < price < 10000000, "Invalid price"
         wear = row.get("float")
         assert wear is None or (type(wear) in (int, float) and math.isfinite(wear) and 0 <= wear <= 1), "Invalid float"
+        assert type(row.get("inspect_available")) is bool, "Invalid inspect availability flag"
         for key in ("paint_seed", "paint_index"):
             value = row.get(key)
             assert value is None or (type(value) is int and 0 <= value <= 100000), f"Invalid {key}"
