@@ -231,6 +231,16 @@ def main():
             print("UUSKINS_SCHEMA_DIAGNOSTIC " + json.dumps({
                 "model": name, "fields": structure_keys(payload.get("data"))
             }, ensure_ascii=False))
+        data_obj = payload.get("data")
+        full_items = data_obj.get("items") if isinstance(data_obj, dict) else None
+        if isinstance(full_items, list):
+            print("UUSKINS_ITEM_COUNT_DIAGNOSTIC " + json.dumps({
+                "model": name,
+                "api_items_returned": len(full_items),
+                "local_sample_limit": 20,
+                "sample_is_truncated": len(full_items) > 20,
+                "note": "Response item count, not total market stock"
+            }, ensure_ascii=False))
         sample = safe_samples(payload.get("data"))
         phase_diagnostics = {
             "sample_count": len(sample),
