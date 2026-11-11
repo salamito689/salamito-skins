@@ -27,6 +27,15 @@ def main():
     rows = data.get("listings")
     assert isinstance(rows, list) and rows, "Empty or invalid feed"
     assert len(rows) == data.get("listing_count"), "Incorrect count"
+    model_coverage = data.get("model_coverage")
+    assert isinstance(model_coverage, dict) and model_coverage, "Per-model coverage required"
+    for model, entry in model_coverage.items():
+        assert isinstance(model, str) and model, "Invalid model name"
+        assert isinstance(entry, dict), "Invalid model coverage"
+        assert entry.get("market_stock_complete") is False, "Market completeness is unverified"
+        count = entry.get("valid_listings_in_feed")
+        assert type(count) is int and count >= 0, "Invalid model count"
+        assert count == sum(row.get("market_hash_name") == model for row in rows), "Model count mismatch"
     seen = set()
     for row in rows:
         assert isinstance(row, dict), "Invalid row"
