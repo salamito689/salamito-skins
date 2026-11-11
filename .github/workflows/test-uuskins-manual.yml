@@ -3,6 +3,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: uuskins-read-only-manual-probe
+  cancel-in-progress: false
 jobs:
   market-probe:
     runs-on: ubuntu-latest
@@ -16,6 +19,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Run offline feed regression tests
+        run: python -m unittest discover -s tests -p 'test_uuskins_feed.py' -v
       - name: Install signing dependency
         run: python -m pip install 'cryptography>=43,<47'
       - name: Query UUSKINS market data (read-only)
