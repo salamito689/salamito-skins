@@ -289,6 +289,27 @@ def main():
                 "candidate_counts_by_phase_and_float": counts,
                 "note": "Only returned first batch; not global market inventory"
             }, ensure_ascii=False))
+        if name == "★ Survival Knife | Forest DDPAT (Field-Tested)" and code in (0, 200):
+            # Raw listing details, not an assertion of newest listing or RMB.
+            # IDs remain in the downloadable sanitized preview, not public logs.
+            snapshot = []
+            for row in (full_items or [])[:5]:
+                if not isinstance(row, dict):
+                    continue
+                snapshot.append({
+                    "float": row.get("wearValue"),
+                    "pattern": row.get("paintSeed"),
+                    "price_raw": row.get("price"),
+                    "has_inspect": bool(row.get("inspectUrl")),
+                })
+            print("UUSKINS_SURVIVAL_SNAPSHOT " + json.dumps({
+                "observed_at_utc": datetime.now(timezone.utc).isoformat(),
+                "model": name,
+                "first_five_by_source_order": snapshot,
+                "currency": "unverified",
+                "new_listing_detected": False,
+                "note": "Current sampled listings only; cannot identify newest without comparing snapshots"
+            }, ensure_ascii=False))
         sample = safe_samples(payload.get("data"))
         phase_diagnostics = {
             "sample_count": len(sample),
