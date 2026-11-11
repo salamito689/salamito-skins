@@ -246,7 +246,7 @@ def main():
                 "sample_is_truncated": len(full_items) > 20,
                 "note": "Response item count, not total market stock"
             }, ensure_ascii=False))
-        if name in ("★ Bayonet | Autotronic (Field-Tested)", "★ Talon Knife | Doppler (Factory New)") and code in (0, 200):
+        if name in ("★ Bayonet | Autotronic (Field-Tested)", "★ Talon Knife | Doppler (Factory New)", "★ Survival Knife | Forest DDPAT (Field-Tested)") and code in (0, 200):
             from collections import Counter
             bands = ((0.15, 0.18), (0.18, 0.21), (0.21, 0.24), (0.24, 0.27),
                      (0.27, 0.30), (0.30, 0.33), (0.33, 0.38))
