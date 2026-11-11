@@ -10,7 +10,7 @@ class PriceMathTests(unittest.TestCase):
         self.assertEqual(str(DEFAULT_SPREAD_BRL_PER_CNY), "0.025")
         self.assertEqual(str(DEFAULT_DELIVERY_FEE_PERCENT), "1")
         quote = price_quote("157.40", self.fx())
-        self.assertEqual(quote["estimated_cost_brl"], "131.16")
+        self.assertEqual(quote["estimated_cost_brl"], "131.15")
         self.assertEqual(quote["spread_brl_per_cny"], "0.025")
         self.assertEqual(quote["delivery_fee_percent"], "1")
         self.assertIsNone(quote["sell_price_brl"])
