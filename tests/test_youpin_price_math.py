@@ -1,11 +1,19 @@
 import unittest
 from datetime import datetime, timezone
-from scripts.youpin_price_math import price_quote
+from scripts.youpin_price_math import price_quote, DEFAULT_SPREAD_BRL_PER_CNY, DEFAULT_DELIVERY_FEE_PERCENT
 
 class PriceMathTests(unittest.TestCase):
     def fx(self):
         return {"pair":"CNY/BRL","source":"Wise API","rate":0.8,
                 "fetched_at":datetime.now(timezone.utc).isoformat()}
+    def test_confirmed_defaults(self):
+        self.assertEqual(str(DEFAULT_SPREAD_BRL_PER_CNY), "0.025")
+        self.assertEqual(str(DEFAULT_DELIVERY_FEE_PERCENT), "1")
+        quote = price_quote("157.40", self.fx())
+        self.assertEqual(quote["estimated_cost_brl"], "131.16")
+        self.assertEqual(quote["spread_brl_per_cny"], "0.025")
+        self.assertEqual(quote["delivery_fee_percent"], "1")
+        self.assertIsNone(quote["sell_price_brl"])
     def test_spread_and_fee(self):
         result = price_quote("100", self.fx())
         self.assertEqual(result["estimated_cost_brl"], "83.33")
