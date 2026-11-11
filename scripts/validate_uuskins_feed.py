@@ -14,6 +14,11 @@ def main():
     assert data.get("schema_version") == 1, "Unsupported schema"
     assert data.get("currency") == "unverified", "Currency needs independent validation"
     assert data.get("checkout_enabled") is False, "Checkout must stay disabled"
+    coverage = data.get("coverage")
+    assert isinstance(coverage, dict), "Coverage declaration required"
+    assert coverage.get("scope") == "first_returned_batch_per_model", "Unexpected inventory scope"
+    assert coverage.get("global_cheapest_verified") is False, "Global price ordering not established"
+    assert coverage.get("source_pagination_verified") is False, "Pagination not verified"
     assert data.get("source") == "UUSKINS staging, read-only", "Unexpected source"
     timestamp = datetime.fromisoformat(data["fetched_at"].replace("Z", "+00:00"))
     assert timestamp.tzinfo is not None, "Timezone required"
