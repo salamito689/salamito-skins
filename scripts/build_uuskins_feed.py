@@ -121,6 +121,7 @@ def main():
         "currency": "unverified",
         "checkout_enabled": False,
         "listing_count": len(result),
+        "coverage": {"scope": "first_returned_batch_per_model", "global_cheapest_verified": False, "source_pagination_verified": False, "note": "Do not interpret an empty float/phase filter as zero market stock."},
         "listings": result
     }
     OUTPUT.write_text(json.dumps(feed, ensure_ascii=False, indent=2), encoding="utf-8")
