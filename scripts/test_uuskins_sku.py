@@ -282,7 +282,9 @@ def main():
                 payload = json.load(response)
                 status = response.status
             if not isinstance(payload, dict) or payload.get("code") not in (0, 200):
-                pagination.append({"page": page, "status": "application_error"})
+                pagination.append({"page": page, "status": "application_error",
+                                   "application_code": payload.get("code") if isinstance(payload, dict) and isinstance(payload.get("code"), (int, str)) else None,
+                                   "message_category": ("pagination_parameter_rejected" if isinstance(payload, dict) and any(term in str(payload.get("message") or payload.get("msg") or "").lower() for term in ("page", "parameter", "invalid", "参数")) else "other")})
                 continue
             rows = safe_samples(payload.get("data"))
             ids = [str(row.get("id") or row.get("skuId") or row.get("sku_id")) for row in rows
@@ -308,7 +310,9 @@ def main():
                   "note": "Diagnostic only; API pagination not trusted until verified"}
     else:
         result = {"model": probe_model, "status": "inconclusive",
-                  "page_statuses": [p["status"] for p in pagination]}
+                  "page_statuses": [p["status"] for p in pagination],
+                  "application_codes": [p.get("application_code") for p in pagination],
+                  "message_categories": [p.get("message_category") for p in pagination]}
     print("UUSKINS_PAGINATION_DIAGNOSTIC " + json.dumps(result, ensure_ascii=False))
     # Currency: report only field names and explicit hints; no assumption from price magnitudes.
     print("UUSKINS_CURRENCY_DIAGNOSTIC " + json.dumps({
