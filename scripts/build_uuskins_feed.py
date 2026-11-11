@@ -97,6 +97,9 @@ def main():
             if not isinstance(model_name, str) or not model_name.strip():
                 continue
             model_name = model_name.strip()[:200]
+            requested_model = group.get("market_hash_name")
+            if not isinstance(requested_model, str) or not requested_model.strip() or model_name != requested_model.strip():
+                continue
             wear = parse_float(item.get("wearValue"))
             if wear is None:
                 continue
