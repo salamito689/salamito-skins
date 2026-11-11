@@ -38,6 +38,7 @@ class TestFeedParsing(unittest.TestCase):
                 {"id": "invalid", "price": "NaN"},
                 {"id": "missing_float", "price": "20.00"},
                 {"id": "bad_float", "price": "20.00", "wearValue": "NaN"},
+                {"id": "wrong_model", "price": "19.00", "wearValue": "0.25", "steamHashName": "AWP | Asiimov (Field-Tested)"},
                 {"id": "valid", "price": "24.52", "wearValue": "0.3447971343994140600", "paintSeed": "440", "paintIndex": "282"},
                 {"id": "valid", "price": "25.00"}
             ]
