@@ -86,7 +86,7 @@ function render(){
   if(count>=10)continue;
   counts.set(key,count+1);shown.push(item);
  }
- $("shown").textContent=shown.length+" anúncios exibidos de "+filtered.length+" candidatos nesta seleção (máximo 10 por modelo/fase). Valores limitados à amostra da API.";
+ $("shown").textContent=shown.length+" anúncios exibidos de "+filtered.length+" candidatos nesta seleção (máximo 10 por modelo/fase). "+(bounds&&shown.length<10?"Atenção: esta faixa tem apenas "+shown.length+" anúncio(s) na amostra recebida; podem existir outros no mercado. ":"")+"Valores limitados à amostra da API, sem garantia de menor preço global.";
  if(!shown.length)addText($("list"),"p",listings.length?"Nenhum anúncio corresponde à busca.":"Carregue um JSON para começar.","empty");
  if(!cart.size){const empty=document.createElement("div");empty.className="cart-empty";addText(empty,"b","Sua seleção está vazia");addText(empty,"span","Escolha uma skin para visualizar os detalhes aqui.");$("cart").append(empty)}
  for(const item of shown){
