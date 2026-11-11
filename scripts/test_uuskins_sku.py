@@ -153,7 +153,17 @@ def main():
     private_key = serialization.load_pem_private_key(pem.encode(), password=None)
     results = []
     inspect_example = None
-    for name in ("AK-47 | Redline (Field-Tested)", "AWP | Asiimov (Field-Tested)"):
+    # Bounded read-only sampling: two established controls plus three Doppler models.
+    # Market hash names identify models, not Phase/Ruby/Sapphire; use paintIndex
+    # and verified source fields before assigning a phase or publishing prices.
+    models = (
+        "AK-47 | Redline (Field-Tested)",
+        "AWP | Asiimov (Field-Tested)",
+        "★ Karambit | Doppler (Factory New)",
+        "★ Butterfly Knife | Doppler (Factory New)",
+        "★ Karambit | Gamma Doppler (Factory New)",
+    )
+    for name in models:
         params = {"appKey": app_key, "marketHashName": name}
         canonical = "".join(k + json.dumps(v, ensure_ascii=False, separators=(",", ":"))
                             for k, v in sorted(params.items()) if v is not None)
@@ -178,11 +188,22 @@ def main():
         code = payload.get("code")
         if name == "AK-47 | Redline (Field-Tested)" and inspect_example is None and code in (0, 200):
             inspect_example = first_inspect_link(payload.get("data"))
+        sample = safe_samples(payload.get("data"))
+        phase_diagnostics = {
+            "sample_count": len(sample),
+            "with_paint_index": sum(row.get("paintIndex") is not None for row in sample),
+            "with_paint_seed": sum(row.get("paintSeed") is not None for row in sample),
+            "with_price": sum(row.get("price") is not None for row in sample),
+            "with_phase_field": sum(row.get("phase") is not None for row in sample),
+            "currency_fields": sorted({str(row.get("currency") or row.get("currencyCode")) for row in sample if row.get("currency") or row.get("currencyCode")}),
+            "note": "Sample only; no total count, phase or currency inferred",
+        }
         results.append({"market_hash_name": name, "http_status": http_status,
+                        "phase_diagnostics": phase_diagnostics,
                         "application_code": code if isinstance(code, (str, int)) else None,
                         "status": "ok" if code in (0, 200) else "application_error",
                         "schema": describe(payload.get("data")),
-                        "sample_listings": safe_samples(payload.get("data"))})
+                        "sample_listings": sample})
         print(f"SKU query {name}: HTTP {http_status}, application code {code}; no orders created")
     if inspect_example:
         Path("uuskins-one-inspect-link.txt").write_text(
