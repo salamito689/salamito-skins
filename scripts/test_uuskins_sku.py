@@ -87,6 +87,22 @@ def safe_samples(obj):
                 return samples
     return []
 
+def first_inspect_link(obj):
+    """Find one exact item link; do not print it to Actions logs."""
+    if isinstance(obj, list):
+        for row in obj:
+            if isinstance(row, dict):
+                link = row.get("inspectUrl") or row.get("inspect_url")
+                if isinstance(link, str) and link.strip().startswith("steam://") and "csgo_econ_action_preview" in link.lower():
+                    return link.strip()
+        return None
+    if isinstance(obj, dict):
+        for value in obj.values():
+            result = first_inspect_link(value)
+            if result:
+                return result
+    return None
+
 def main():
     app_key = os.environ.get("UUSKINS_APP_KEY", "").strip()
     pem = os.environ.get("UUSKINS_PRIVATE_KEY_PEM", "").replace("\\n", "\n").strip()
@@ -94,6 +110,7 @@ def main():
         raise SystemExit("Invalid/missing secret formats")
     private_key = serialization.load_pem_private_key(pem.encode(), password=None)
     results = []
+    inspect_example = None
     for name in ("AK-47 | Redline (Field-Tested)", "AWP | Asiimov (Field-Tested)"):
         params = {"appKey": app_key, "marketHashName": name}
         canonical = "".join(k + json.dumps(v, ensure_ascii=False, separators=(",", ":"))
@@ -117,12 +134,25 @@ def main():
             results.append({"market_hash_name": name, "http_status": http_status, "status": "unexpected_shape"})
             continue
         code = payload.get("code")
+        if name == "AK-47 | Redline (Field-Tested)" and inspect_example is None and code in (0, 200):
+            inspect_example = first_inspect_link(payload.get("data"))
         results.append({"market_hash_name": name, "http_status": http_status,
                         "application_code": code if isinstance(code, (str, int)) else None,
                         "status": "ok" if code in (0, 200) else "application_error",
                         "schema": describe(payload.get("data")),
                         "sample_listings": safe_samples(payload.get("data"))})
         print(f"SKU query {name}: HTTP {http_status}, application code {code}; no orders created")
+    if inspect_example:
+        Path("uuskins-one-inspect-link.txt").write_text(
+            "LINK DE INSPECAO DE UMA AK-47 REDLINE (anuncio individual, temporario):\\n"
+            + inspect_example + "\\n\\n"
+            + "Cole apenas a linha steam:// no campo INSPECT LINK do Inspekt Sandbox.\\n"
+            + "Este link nao e uma chave de API. Nao publica-lo no catalogo.\\n",
+            encoding="utf-8",
+        )
+        print("One individual inspect link saved to isolated artifact (not printed)")
+    else:
+        print("No valid AK-47 Redline inspect link found; artifact will not be created")
     OUT.write_text(json.dumps({"source": "UUSKINS read-only SKU test, not production",
                                "fetched_at": datetime.now(timezone.utc).isoformat(),
                                "currency": "unverified", "results": results},
