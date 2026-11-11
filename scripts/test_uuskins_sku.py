@@ -73,9 +73,25 @@ def inspect_metadata(row):
     return diagnostic
 
 
+def exact_embed_code(row):
+    """Extract the actual hex inspect payload for this exact SKU, never credentials."""
+    import re
+    from urllib.parse import unquote
+    link = row.get("inspectUrl") or row.get("inspect_url")
+    if not isinstance(link, str):
+        return None
+    value = unquote(unquote(link.strip()))
+    match = re.search(r"csgo_econ_action_preview(?:[\\s/+]|%20)+([A-Fa-f0-9]{24,})", value, re.I)
+    if not match:
+        return None
+    code = match.group(1)
+    if code.upper().startswith("A") and len(code) % 2 == 1:
+        code = code[1:]
+    return code.upper() if len(code) % 2 == 0 and len(code) <= 4096 else None
+
 def safe_samples(obj):
     if isinstance(obj, list):
-        return [{**{k: v for k, v in row.items() if k in ALLOWED and isinstance(v, (str, int, float, bool)) and len(str(v)) < 150}, **inspect_metadata(row)}
+        return [{**{k: v for k, v in row.items() if k in ALLOWED and isinstance(v, (str, int, float, bool)) and len(str(v)) < 150}, **inspect_metadata(row), "inspect_embed_code": exact_embed_code(row)}
                 for row in obj[:20] if isinstance(row, dict)]
     if isinstance(obj, dict):
         for key in ("items", "list", "records", "skuList", "sku_list"):
