@@ -1,12 +1,14 @@
 """Validate a manually exported Youpin share response without making requests.
 Usage: python scripts/probe_youpin_price.py youpin-share-response.json
-No authentication, browser automation, production writes, or FX conversion.
+Optional unauthenticated HTTPS read; no browser automation, production writes, or FX conversion.
 Never commit exported responses containing personal data or tokens.
 """
 import json
 import math
 import pathlib
 import sys
+import urllib.request
+import urllib.error
 from datetime import datetime, timezone
 
 def extract(payload, expected_id=None):
@@ -41,12 +43,37 @@ def extract(payload, expected_id=None):
 
 def main():
     if len(sys.argv) not in (2, 3):
-        raise SystemExit("Usage: python scripts/probe_youpin_price.py response.json [expected_listing_id]")
-    path = pathlib.Path(sys.argv[1])
-    if path.stat().st_size > 2_000_000:
-        raise ValueError("Response too large")
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    print(json.dumps(extract(payload, sys.argv[2] if len(sys.argv) == 3 else None), ensure_ascii=False, indent=2))
+        raise SystemExit("Usage: python scripts/probe_youpin_price.py response.json|https://api.youpin898.com/api/youpin/commodity/detail/share?Id=... [expected_listing_id]")
+    source = sys.argv[1]
+    expected = sys.argv[2] if len(sys.argv) == 3 else None
+    if source.startswith("https://"):
+        from urllib.parse import urlsplit, parse_qs
+        parts = urlsplit(source)
+        if (parts.scheme != "https" or parts.netloc != "api.youpin898.com"
+                or parts.path != "/api/youpin/commodity/detail/share"
+                or parts.fragment or set(parse_qs(parts.query)) != {"Id"}):
+            raise ValueError("Only the public Youpin share detail endpoint is allowed")
+        identifier = parse_qs(parts.query)["Id"]
+        if len(identifier) != 1 or not identifier[0].isdecimal():
+            raise ValueError("Invalid listing ID")
+        expected = expected or identifier[0]
+        request = urllib.request.Request(source, headers={"Accept": "application/json", "User-Agent": "SalamitoSkins-Staging-PriceProbe/1.0"})
+        try:
+            with urllib.request.urlopen(request, timeout=12) as response:
+                if response.status != 200:
+                    raise ValueError("HTTP response not successful")
+                body = response.read(2_000_001)
+        except urllib.error.HTTPError as exc:
+            raise ValueError(f"Youpin rejected unauthenticated request: HTTP {exc.code}") from exc
+        if len(body) > 2_000_000:
+            raise ValueError("Response too large")
+        payload = json.loads(body)
+    else:
+        path = pathlib.Path(source)
+        if path.stat().st_size > 2_000_000:
+            raise ValueError("Response too large")
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    print(json.dumps(extract(payload, expected), ensure_ascii=False, indent=2))
 
 if __name__ == "__main__":
     main()
