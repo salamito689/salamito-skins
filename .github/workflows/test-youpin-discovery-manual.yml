@@ -1,0 +1,19 @@
+name: Youpin listing discovery schema probe (manual)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/uuskins-safe-integration
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Probe one listing-discovery request without credentials
+        run: python scripts/probe_youpin_discovery.py
