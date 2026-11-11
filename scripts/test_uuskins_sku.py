@@ -29,7 +29,7 @@ def describe(obj, depth=0):
 def safe_samples(obj):
     if isinstance(obj, list):
         return [{k: v for k, v in row.items() if k in ALLOWED and isinstance(v, (str, int, float, bool)) and len(str(v)) < 150}
-                for row in obj[:3] if isinstance(row, dict)]
+                for row in obj[:20] if isinstance(row, dict)]
     if isinstance(obj, dict):
         for key in ("items", "list", "records", "skuList", "sku_list"):
             if isinstance(obj.get(key), list):
