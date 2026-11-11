@@ -73,7 +73,8 @@ def main():
                 "float": parse_float(item.get("wearValue")),
                 "paint_seed": parse_integer(item.get("paintSeed")),
                 "paint_index": parse_integer(item.get("paintIndex")),
-                "inspect_available": item.get("inspect_available") is True,\n                "inspect_embed_code": item.get("inspect_embed_code") if isinstance(item.get("inspect_embed_code"), str) and 24 <= len(item["inspect_embed_code"]) <= 4096 and len(item["inspect_embed_code"]) % 2 == 0 and all(c in "0123456789abcdefABCDEF" for c in item["inspect_embed_code"]) else None,
+                "inspect_available": item.get("inspect_available") is True,
+                "inspect_embed_code": item.get("inspect_embed_code") if isinstance(item.get("inspect_embed_code"), str) and 24 <= len(item["inspect_embed_code"]) <= 4096 and len(item["inspect_embed_code"]) % 2 == 0 and all(c in "0123456789abcdefABCDEF" for c in item["inspect_embed_code"]) else None,
                 "inspect_format": item.get("inspect_format") if item.get("inspect_format") in ("hex_payload", "legacy_asset", "unknown", "missing", "unsupported") else "unknown"
             })
     if not result:
