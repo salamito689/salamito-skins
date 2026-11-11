@@ -19,6 +19,8 @@ let listings=[],cart=new Map();
 const fmt=v=>v===null||v===undefined||v===""?"Não informado":String(v);
 function field(x,...names){for(const name of names){if(x[name]!==undefined&&x[name]!==null)return x[name]}return null}
 function addText(el,tag,text,cls){const n=document.createElement(tag);n.textContent=String(text);if(cls)n.className=cls;el.append(n);return n}
+function shortFloat(v){const n=Number(v);return v===null||v===undefined||v===""||!Number.isFinite(n)?"Não informado":n.toFixed(8)}
+function shortId(v){const s=String(v);return s.length>14?s.slice(0,8)+"…"+s.slice(-5):s}
 function render(){
  $("list").replaceChildren();$("cart").replaceChildren();$("qty").textContent=cart.size;
  for(const item of listings){
@@ -26,7 +28,7 @@ function render(){
   addText(card,"h3",item.name);
   addText(card,"div",fmt(item.price)+" · moeda não confirmada","price");
   const dl=document.createElement("dl");
-  for(const [label,value] of [["Float",item.float],["Paint seed",item.seed],["Paint index",item.index],["ID do anúncio",item.id]]){
+  for(const [label,value] of [["Float",shortFloat(item.float)],["Paint seed",item.seed],["Paint index",item.index],["ID do anúncio",shortId(item.id)]]){
    addText(dl,"dt",label);addText(dl,"dd",fmt(value));
   }
   card.append(dl);
@@ -35,8 +37,8 @@ function render(){
  }
  for(const item of cart.values()){
   const div=document.createElement("div");div.className="cart-item";
-  addText(div,"strong",item.name);addText(div,"div","Anúncio "+item.id+" · Float "+fmt(item.float));
-  addText(div,"div","Preço original: "+fmt(item.price));
+  addText(div,"strong",item.name);addText(div,"div","Anúncio "+shortId(item.id)+" · Float "+shortFloat(item.float));
+  addText(div,"div","Preço original: "+fmt(item.price)+" (moeda não confirmada)");
   const btn=document.createElement("button");btn.textContent="Remover";btn.addEventListener("click",()=>{cart.delete(item.key);render()});div.append(btn);$("cart").append(div);
  }
 }
