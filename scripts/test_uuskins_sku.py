@@ -89,6 +89,28 @@ def exact_embed_code(row):
         code = code[1:]
     return code.upper() if len(code) % 2 == 0 and len(code) <= 4096 else None
 
+# CS2 Doppler paint kits; phase labels are based on paint index, not market hash.
+# Kept diagnostic-only until raw currency and market scope are validated.
+DOPPLER_PHASE_BY_PAINT_INDEX = {
+    415: "Ruby", 416: "Sapphire", 417: "Black Pearl",
+    418: "Phase 1", 419: "Phase 2", 420: "Phase 3", 421: "Phase 4",
+}
+GAMMA_PHASE_BY_PAINT_INDEX = {
+    568: "Emerald", 569: "Phase 1", 570: "Phase 2",
+    571: "Phase 3", 572: "Phase 4",
+}
+
+def phase_for_model(model, index):
+    try:
+        value = int(index)
+    except (TypeError, ValueError):
+        return None
+    if "Gamma Doppler" in model:
+        return GAMMA_PHASE_BY_PAINT_INDEX.get(value)
+    if "Doppler" in model:
+        return DOPPLER_PHASE_BY_PAINT_INDEX.get(value)
+    return None
+
 IMAGE_KEYWORDS = ("image", "img", "photo", "picture", "screenshot", "thumbnail", "icon", "preview", "render")
 
 def image_field_diagnostics(row):
@@ -230,7 +252,7 @@ def main():
                     continue
                 by_index.setdefault(str(index), []).append(price)
             per_index = {
-                key: {"count": len(values), "min_raw": min(values), "max_raw": max(values)}
+                key: {"phase": phase_for_model(name, key), "count": len(values), "min_raw": min(values), "max_raw": max(values)}
                 for key, values in sorted(by_index.items())[:30]
             }
             print(json.dumps({
@@ -241,7 +263,7 @@ def main():
                 "price_min_raw": min(prices) if prices else None,
                 "price_max_raw": max(prices) if prices else None,
                 "currency_hints": phase_diagnostics["currency_fields"],
-                "warning": "Raw price currency unverified; paint indices are not yet mapped to phases; sample is not total stock",
+                "warning": "Raw price currency unverified; phase mapping diagnostic only; sample is not total stock",
             }, ensure_ascii=False))
     if inspect_example:
         Path("uuskins-one-inspect-link.txt").write_text(
