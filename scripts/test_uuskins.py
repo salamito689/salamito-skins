@@ -69,10 +69,24 @@ def main():
         {"market_hash_name": x.get("market_hash_name"), "min_price": x.get("min_price"), "count": x.get("count")}
         for x in items[:20] if isinstance(x, dict)
     ]
+    # Inspect response structure without exposing credentials, signatures or raw payloads.
+    # Only allowlisted market metadata and field NAMES are exported.
+    item_fields = sorted({str(k) for x in items[:20] if isinstance(x, dict) for k in x.keys()})
+    data_fields = sorted(str(k) for k in data.keys())
+    top_level_fields = sorted(str(k) for k in payload.keys())
+    currency_hints = {}
+    for parent_name, parent in (("response", payload), ("data", data)):
+        for key in ("currency", "currencyCode", "currency_code", "priceCurrency", "priceUnit", "unit"):
+            value = parent.get(key)
+            if isinstance(value, (str, int, float)) and len(str(value)) <= 30:
+                currency_hints[parent_name + "." + key] = value
+    print("Market item field names:", ", ".join(item_fields))
+    print("Currency hints available:", bool(currency_hints))
     OUT.write_text(json.dumps({
         "source": "UUSKINS test (not production)",
         "fetched_at": datetime.now(timezone.utc).isoformat(),
         "currency": "unverified",
+        "schema": {"response_fields": top_level_fields, "data_fields": data_fields, "item_fields": item_fields, "currency_hints": currency_hints},
         "items": sample
     }, ensure_ascii=False, indent=2), encoding="utf-8")
     print("Read-only UUSKINS query succeeded; preview saved to", OUT)
