@@ -72,7 +72,8 @@ def main():
                 "price_original": price,
                 "float": parse_float(item.get("wearValue")),
                 "paint_seed": parse_integer(item.get("paintSeed")),
-                "paint_index": parse_integer(item.get("paintIndex"))
+                "paint_index": parse_integer(item.get("paintIndex")),
+                "inspect_available": item.get("inspect_available") is True
             })
     if not result:
         raise ValueError("No valid individual listings; no feed generated")
