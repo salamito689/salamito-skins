@@ -1,6 +1,6 @@
 """Staging-only Youpin CNY -> BRL pricing, Decimal arithmetic.
 The Wise quote must be supplied from a fresh trusted fx.json snapshot.
-Formula (assumption pending business confirmation):
+Confirmed delivery-cost formula:
   (listing RMB * (Wise BRL per CNY + 0.025)) * 1.01
 This is NOT a sales margin, nor a checkout price.
 """
@@ -10,7 +10,7 @@ from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 
 MAX_FX_AGE_SECONDS = 3600
 SPREAD_BRL_PER_CNY = Decimal("0.025")
-ITEM_FEE = Decimal("0.01")
+DELIVERY_FEE = Decimal("0.01")
 
 def decimal(value):
     if isinstance(value, bool):
@@ -40,13 +40,25 @@ def price_quote(price_rmb, fx):
         raise ValueError("Invalid listing price")
     effective = rate + SPREAD_BRL_PER_CNY
     base = amount * effective
-    total = (base * (Decimal("1") + ITEM_FEE)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    total = (base * (Decimal("1") + DELIVERY_FEE)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     return {"currency": "BRL", "source_currency": "CNY", "price_rmb": str(amount),
             "wise_rate": str(rate), "spread_brl_per_cny": str(SPREAD_BRL_PER_CNY),
-            "effective_rate": str(effective), "item_fee_percent": "1",
+            "effective_rate": str(effective), "delivery_fee_percent": "1",
             "subtotal_brl": str(base.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)),
             "estimated_cost_brl": str(total), "sell_price_brl": None,
             "status": "staging_estimate_not_for_checkout"}
+
+def selling_price(cost_brl, markup_percent):
+    """Optional markup on total acquisition/delivery cost, not profit margin on revenue."""
+    cost = decimal(cost_brl)
+    markup = decimal(markup_percent)
+    if cost <= 0 or not Decimal("0") <= markup <= Decimal("100"):
+        raise ValueError("Invalid cost or markup")
+    result = (cost * (Decimal("1") + markup / Decimal("100"))).quantize(
+        Decimal("0.01"), rounding=ROUND_HALF_UP)
+    return {"cost_brl": str(cost), "markup_percent": str(markup),
+            "sell_price_brl": str(result), "gross_profit_brl": str(result - cost),
+            "status": "staging_only"}
 
 if __name__ == "__main__":
     import argparse
