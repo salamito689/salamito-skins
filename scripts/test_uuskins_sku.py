@@ -205,6 +205,27 @@ def main():
                         "schema": describe(payload.get("data")),
                         "sample_listings": sample})
         print(f"SKU query {name}: HTTP {http_status}, application code {code}; no orders created")
+        # Print bounded aggregate diagnostics only; no credentials, inspect links or item IDs.
+        if "Doppler" in name and code in (0, 200):
+            from collections import Counter
+            indices = Counter(str(row["paintIndex"]) for row in sample if row.get("paintIndex") is not None)
+            prices = []
+            for row in sample:
+                try:
+                    value = float(row.get("price"))
+                    if 0 < value < 10000000 and __import__("math").isfinite(value):
+                        prices.append(value)
+                except (TypeError, ValueError):
+                    pass
+            print(json.dumps({
+                "model": name, "sample_count": len(sample),
+                "paint_index_counts": dict(sorted(indices.items())[:30]),
+                "prices_observed": len(prices),
+                "price_min_raw": min(prices) if prices else None,
+                "price_max_raw": max(prices) if prices else None,
+                "currency_hints": phase_diagnostics["currency_fields"],
+                "warning": "Raw price currency unverified; paint indices are not yet mapped to phases; sample is not total stock",
+            }, ensure_ascii=False))
     if inspect_example:
         Path("uuskins-one-inspect-link.txt").write_text(
             "LINK DE INSPECAO DE UMA AK-47 REDLINE (anuncio individual, temporario):\\n"
