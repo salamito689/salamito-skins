@@ -81,7 +81,7 @@ def exact_embed_code(row):
     if not isinstance(link, str):
         return None
     value = unquote(unquote(link.strip()))
-    match = re.search(r"csgo_econ_action_preview(?:[\\s/+]|%20)+([A-Fa-f0-9]{24,})", value, re.I)
+    match = re.search(r"csgo_econ_action_preview(?:[\s/+]|%20)+([A-Fa-f0-9]{24,})", value, re.I)
     if not match:
         return None
     code = match.group(1)
