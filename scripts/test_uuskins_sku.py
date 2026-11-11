@@ -184,6 +184,8 @@ def main():
         "★ Karambit | Doppler (Factory New)",
         "★ Butterfly Knife | Doppler (Factory New)",
         "★ Karambit | Gamma Doppler (Factory New)",
+        "★ Bayonet | Autotronic (Field-Tested)",
+        "★ Talon Knife | Doppler (Factory New)",
     )
     for name in models:
         params = {"appKey": app_key, "marketHashName": name}
