@@ -89,9 +89,35 @@ def exact_embed_code(row):
         code = code[1:]
     return code.upper() if len(code) % 2 == 0 and len(code) <= 4096 else None
 
+IMAGE_KEYWORDS = ("image", "img", "photo", "picture", "screenshot", "thumbnail", "icon", "preview", "render")
+
+def image_field_diagnostics(row):
+    """Describe possible source images without exposing unverified URLs or claiming exactness."""
+    from urllib.parse import urlparse
+    findings = []
+    def scan(obj, prefix="", depth=0):
+        if depth > 2 or len(findings) >= 20:
+            return
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                label = (prefix + "." if prefix else "") + str(key)
+                if any(word in str(key).lower() for word in IMAGE_KEYWORDS):
+                    kind = type(value).__name__
+                    is_https = False
+                    host = None
+                    if isinstance(value, str):
+                        parsed = urlparse(value)
+                        is_https = parsed.scheme == "https" and bool(parsed.hostname)
+                        host = parsed.hostname if is_https else None
+                    findings.append({"field": label[:100], "type": kind, "https_url": is_https, "host": host})
+                elif isinstance(value, dict):
+                    scan(value, label, depth + 1)
+    scan(row)
+    return findings
+
 def safe_samples(obj):
     if isinstance(obj, list):
-        return [{**{k: v for k, v in row.items() if k in ALLOWED and isinstance(v, (str, int, float, bool)) and len(str(v)) < 150}, **inspect_metadata(row), "inspect_embed_code": exact_embed_code(row)}
+        return [{**{k: v for k, v in row.items() if k in ALLOWED and isinstance(v, (str, int, float, bool)) and len(str(v)) < 150}, **inspect_metadata(row), "inspect_embed_code": exact_embed_code(row), "image_field_diagnostics": image_field_diagnostics(row)}
                 for row in obj[:20] if isinstance(row, dict)]
     if isinstance(obj, dict):
         for key in ("items", "list", "records", "skuList", "sku_list"):
