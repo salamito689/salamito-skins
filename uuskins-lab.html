@@ -9,7 +9,7 @@
 <div class="notice"><b>AMBIENTE EXPERIMENTAL — SEM COMPRAS.</b> Os preços estão na moeda original da API, ainda não validada. Nenhuma conversão em reais, reserva ou pedido é efetuado. Dados carregados manualmente podem estar desatualizados.</div>
 <div class="upload"><label for="file">Carregar anúncios de teste:</label> <input id="file" type="file" accept=".json,application/json"></div>
 <p id="status" role="status">Nenhum arquivo carregado.</p>
-<div class="layout"><section><div class="section-heading"><h2>Anúncios individuais</h2><span class="eyebrow">Seleção por unidade</span></div><div class="filters"><input id="search" type="search" placeholder="Buscar skin..." aria-label="Buscar skin"><select id="model" aria-label="Selecionar modelo"><option value="">Todas as skins</option></select><select id="variant" aria-label="Selecionar fase"><option value="">Todas as fases</option></select><select id="floatRange" aria-label="Selecionar faixa de float"><option value="">Todos os floats</option><option value="0.00:0.07">0.00 até 0.07</option><option value="0.07:0.15">0.07 até 0.15</option><option value="0.15:0.18">0.15 até 0.18</option><option value="0.18:0.21">0.18 até 0.21</option><option value="0.21:0.24">0.21 até 0.24</option><option value="0.24:0.27">0.24 até 0.27</option><option value="0.27:0.30">0.27 até 0.30</option><option value="0.30:0.33">0.30 até 0.33</option><option value="0.33:0.38">0.33 até 0.38</option><option value="0.38:0.45">0.38 até 0.45</option><option value="0.45:1.00">0.45 até 1.00</option></select></div><p id="shown" class="small"></p><div id="list" class="grid"></div></section>
+<div class="layout"><section><div class="section-heading"><h2>Anúncios individuais</h2><span class="eyebrow">Seleção por unidade</span></div><div class="filters"><input id="search" type="search" placeholder="Buscar skin..." aria-label="Buscar skin"><select id="model" aria-label="Selecionar modelo"><option value="">Todas as skins</option></select><select id="variant" aria-label="Selecionar fase"><option value="">Todas as fases</option></select><select id="floatRange" aria-label="Selecionar faixa de float"><option value="">Todos os floats</option><option value="0.00:0.07">0.00 até 0.07</option><option value="0.07:0.15">0.07 até 0.15</option><option value="0.15:0.18">0.15 até 0.18</option><option value="0.18:0.21">0.18 até 0.21</option><option value="0.21:0.24">0.21 até 0.24</option><option value="0.24:0.27">0.24 até 0.27</option><option value="0.27:0.30">0.27 até 0.30</option><option value="0.30:0.33">0.30 até 0.33</option><option value="0.33:0.38">0.33 até 0.38</option><option value="0.38:0.45">0.38 até 0.45</option><option value="0.45:1.00">0.45 até 1.00</option></select></div><div id="floatChips" class="filters" aria-label="Faixas rápidas de float"></div><p id="shown" class="small"></p><div id="list" class="grid"></div></section>
 <aside class="cart"><h2>Minha seleção (<span id="qty">0</span>)</h2><p class="cart-count">Anúncios específicos escolhidos</p><div id="cart"></div><div class="cart-footer"><p class="small">Seleção local para demonstração. Não reserva itens nem garante preço ou disponibilidade.</p><button disabled title="Checkout desabilitado">Finalizar compra (indisponível)</button></div></aside></div>
 </main><script>
 "use strict";
@@ -61,6 +61,7 @@ function refreshVariantOptions(){
  select.value=[...select.options].some(x=>x.value===previous)?previous:"";
 }
 function render(){
+ refreshFloatChips();
  $("list").replaceChildren();$("cart").replaceChildren();$("qty").textContent=cart.size;
  const query=$("search").value.trim().toLocaleLowerCase("pt-BR");
  const model=$("model").value,variant=$("variant").value,range=$("floatRange").value;
@@ -142,6 +143,19 @@ function render(){
   addText(div,"div",fmt(item.price)+" · moeda não confirmada","cart-price");
   const idText=addText(div,"div","ID: "+shortId(item.id),"cart-meta");idText.title=item.id;
   const btn=document.createElement("button");btn.textContent="Remover da seleção";btn.addEventListener("click",()=>{cart.delete(item.key);render()});div.append(btn);addGameInspect(div,item);$("cart").append(div);
+ }
+}
+const quickBands=[["","Todas"],["0.15:0.18","0,15–0,18"],["0.18:0.21","0,18–0,21"],["0.21:0.24","0,21–0,24"],["0.24:0.27","0,24–0,27"],["0.27:0.30","0,27–0,30"],["0.30:0.33","0,30–0,33"],["0.33:0.38","0,33–0,38"]];
+function refreshFloatChips(){
+ const root=$("floatChips");root.replaceChildren();
+ for(const [value,label] of quickBands){
+  const button=document.createElement("button");button.type="button";
+  const active=$("floatRange").value===value;
+  button.textContent=label;button.setAttribute("aria-pressed",String(active));
+  button.style.background=active?"#2563eb":"#173455";
+  button.style.border="1px solid "+(active?"#76b3ff":"#3c638d");
+  button.addEventListener("click",()=>{$("floatRange").value=value;render()});
+  root.append(button);
  }
 }
 $("search").addEventListener("input",render);
