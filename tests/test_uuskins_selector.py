@@ -32,6 +32,12 @@ class TestSelector(unittest.TestCase):
         self.assertEqual([r["id"] for r in selector.select_listings(rows, name, 0, .07, "Phase 1")], ["1"])
         self.assertEqual([r["id"] for r in selector.select_listings(rows, name, 0, .07, "Phase 2")], ["2"])
 
+    def test_talon_specific_paint_indices(self):
+        name = "★ Talon Knife | Doppler (Factory New)"
+        rows = [self.row(1, .01, 90, name, 852), self.row(2, .02, 70, name, 854)]
+        self.assertEqual([r["id"] for r in selector.select_listings(rows, name, 0, .07, "Phase 1")], ["1"])
+        self.assertEqual([r["id"] for r in selector.select_listings(rows, name, 0, .07, "Phase 3")], ["2"])
+
     def test_float_boundary_and_invalids(self):
         rows = [self.row("a", .18, 5), self.row("b", None, 1), self.row("c", .16, float("nan"))]
         self.assertEqual(selector.select_listings(rows, "★ Bayonet | Autotronic (Field-Tested)", .15, .18), [])
