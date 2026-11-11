@@ -42,6 +42,7 @@ const DOPPLER_PHASES={415:"Ruby",416:"Sapphire",417:"Black Pearl",418:"Phase 1",
 const GAMMA_PHASES={568:"Emerald",569:"Phase 1",570:"Phase 2",571:"Phase 3",572:"Phase 4"};
 function phaseOf(item){
  if(item.name.includes("Gamma Doppler"))return GAMMA_PHASES[Number(item.index)]||"Fase não identificada";
+ if(item.name.includes("Talon Knife")&&item.name.includes("Doppler"))return ({852:"Phase 1",853:"Phase 2",854:"Phase 3",855:"Phase 4"})[Number(item.index)]||DOPPLER_PHASES[Number(item.index)]||"Fase não identificada";
  if(item.name.includes("Doppler"))return DOPPLER_PHASES[Number(item.index)]||"Fase não identificada";
  return "Padrão";
 }
