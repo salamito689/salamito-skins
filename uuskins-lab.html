@@ -51,27 +51,43 @@ function render(){
 }
 $("search").addEventListener("input",render);
 $("sort").addEventListener("change",render);
+function loadPreview(data){
+ if(!data||!Array.isArray(data.results))throw Error("Formato inválido: esperado results[]");
+ const parsed=[];
+ for(const group of data.results){
+  if(!Array.isArray(group.sample_listings)||group.status!=="ok")continue;
+  for(const x of group.sample_listings){
+   if(!x||typeof x!=="object")continue;
+   const id=field(x,"id","skuId","sku_id");
+   if(id===null||String(id).trim()==="")continue;
+   const name=field(x,"steamHashName","marketHashName","market_hash_name")||group.market_hash_name||"Skin";
+   const price=field(x,"price","salePrice","sellPrice");
+   if(price===null||!Number.isFinite(Number(price))||Number(price)<0)continue;
+   parsed.push({id:String(id),key:String(id),name:String(name),price,
+    float:field(x,"wearValue","float","floatValue"),seed:field(x,"paintSeed"),index:field(x,"paintIndex")});
+  }
+ }
+ listings=Array.from(new Map(parsed.map(x=>[x.key,x])).values());
+ cart.clear();render();
+ const fetched=Date.parse(data.fetched_at);
+ const age=Number.isFinite(fetched)?Math.max(0,Date.now()-fetched):NaN;
+ const ageText=Number.isFinite(age)?(" Consulta de "+new Date(fetched).toLocaleString("pt-BR")+"."):" Data da consulta desconhecida.";
+ const stale=!Number.isFinite(age)||age>15*60*1000;
+ $("status").textContent=listings.length+" anúncios de demonstração carregados."+ageText+(stale?" ATENÇÃO: dados antigos, preços e disponibilidade podem ter mudado.":" Dados não são em tempo real.");
+}
 $("file").addEventListener("change",async event=>{
  const file=event.target.files[0];if(!file)return;
  try{
   if(file.size>3_000_000)throw Error("Arquivo muito grande (máximo 3 MB)");
-  const data=JSON.parse(await file.text());
-  if(!data||!Array.isArray(data.results))throw Error("Formato inválido: esperado results[]");
-  const parsed=[];
-  for(const group of data.results){
-   if(!Array.isArray(group.sample_listings))continue;
-   for(const x of group.sample_listings){
-    if(!x||typeof x!=="object")continue;
-    const id=field(x,"id","skuId","sku_id");
-    if(id===null)continue;
-    const name=field(x,"steamHashName","marketHashName","market_hash_name")||group.market_hash_name||"Skin";
-    parsed.push({id:String(id),key:String(id),name:String(name),price:field(x,"price","salePrice","sellPrice"),
-      float:field(x,"wearValue","float","floatValue"),seed:field(x,"paintSeed"),
-      index:field(x,"paintIndex")});
-   }
-  }
-  listings=Array.from(new Map(parsed.map(x=>[x.key,x])).values());cart.clear();render();
-  $("status").textContent=listings.length+" anúncios carregados. Apenas amostras do teste, não dados ao vivo.";
+  loadPreview(JSON.parse(await file.text()));
  }catch(err){listings=[];cart.clear();render();$("status").textContent="Não foi possível carregar: "+err.message}
 });
+// Automatic loading is available only when served over HTTP(S), not file://.
+// Never fetch merchant credentials or invoke signed API calls in the browser.
+if(location.protocol==="http:"||location.protocol==="https:"){
+ fetch("./uuskins-sku-preview.json",{cache:"no-store"}).then(response=>{
+  if(!response.ok)throw Error("Arquivo de demonstração indisponível");
+  return response.json();
+ }).then(loadPreview).catch(()=>{$("status").textContent="Selecione o JSON para visualizar os anúncios de teste."});
+}
 </script></body></html>
