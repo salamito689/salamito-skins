@@ -55,6 +55,14 @@ jobs:
             uuskins-feed-staging.json
             uuskins-lab.html
           retention-days: 3
+      - name: Upload one exact AK inspect link for sandbox test
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: uuskins-one-inspect-link
+          path: uuskins-one-inspect-link.txt
+          if-no-files-found: warn
+          retention-days: 1
       - name: Upload isolated preview artifact
         if: success()
         uses: actions/upload-artifact@v4
