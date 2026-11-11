@@ -2,6 +2,8 @@
 No credentials, checkout actions, currency conversion, or production writes.
 """
 import json
+import hashlib
+import re
 import math
 import pathlib
 from datetime import datetime, timezone
@@ -10,6 +12,31 @@ SOURCE = pathlib.Path("uuskins-sku-preview.json")
 OUTPUT = pathlib.Path("uuskins-feed-staging.json")
 FIELDS = ("id", "skuId", "sku_id")
 MAX_AGE_SECONDS = 900
+IMAGE_MANIFEST = pathlib.Path("exact-images/manifest.json")
+
+def validated_images():
+    """Only explicitly attested SKU+inspect matches may enter the staging feed."""
+    if not IMAGE_MANIFEST.is_file():
+        return {}
+    payload = json.loads(IMAGE_MANIFEST.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict) or payload.get("schema_version") != 1 or not isinstance(payload.get("images"), list):
+        raise ValueError("Invalid exact image manifest")
+    result = {}
+    for record in payload["images"]:
+        if not isinstance(record, dict) or record.get("source") != "UUSKINS":
+            continue
+        identifier = record.get("listing_id")
+        filename = record.get("file")
+        fingerprint = record.get("inspect_sha256")
+        if not isinstance(identifier, str) or not isinstance(filename, str) or not isinstance(fingerprint, str):
+            continue
+        if not re.fullmatch(r"[a-zA-Z0-9_-]+\.(?:webp|avif|png)", filename) or not re.fullmatch(r"[0-9a-f]{64}", fingerprint):
+            continue
+        path = IMAGE_MANIFEST.parent / filename
+        if path.is_file() and 0 < path.stat().st_size <= 2_000_000:
+            result[identifier] = (filename, fingerprint)
+    return result
+
 
 def parse_float(value):
     if value is None or isinstance(value, bool):
@@ -43,6 +70,7 @@ def main():
     if raw.get("currency") != "unverified":
         raise ValueError("Unexpected currency field; requires manual validation")
     result = []
+    images = validated_images()
     seen = set()
     for group in raw.get("results", []):
         if group.get("status") != "ok":
@@ -66,10 +94,16 @@ def main():
             if not math.isfinite(price) or not 0 < price < 10000000:
                 continue
             seen.add(identifier)
+            code = item.get("inspect_embed_code")
+            code = code.upper() if isinstance(code, str) and re.fullmatch(r"[0-9a-fA-F]{24,4096}", code) and len(code) % 2 == 0 else None
+            fingerprint = hashlib.sha256(code.encode("ascii")).hexdigest() if code else None
+            image_entry = images.get(identifier)
+            exact_image = image_entry[0] if image_entry and image_entry[1] == fingerprint else None
             result.append({
                 "id": identifier,
                 "market_hash_name": str(item.get("steamHashName") or group.get("market_hash_name") or "")[:200],
                 "price_original": price,
+                "exact_image_file": exact_image,
                 "float": parse_float(item.get("wearValue")),
                 "paint_seed": parse_integer(item.get("paintSeed")),
                 "paint_index": parse_integer(item.get("paintIndex")),
