@@ -217,9 +217,26 @@ def main():
                         prices.append(value)
                 except (TypeError, ValueError):
                     pass
+            by_index = {}
+            for row in sample:
+                index = row.get("paintIndex")
+                if index is None:
+                    continue
+                try:
+                    price = float(row.get("price"))
+                    if not 0 < price < 10000000 or not __import__("math").isfinite(price):
+                        continue
+                except (TypeError, ValueError):
+                    continue
+                by_index.setdefault(str(index), []).append(price)
+            per_index = {
+                key: {"count": len(values), "min_raw": min(values), "max_raw": max(values)}
+                for key, values in sorted(by_index.items())[:30]
+            }
             print(json.dumps({
                 "model": name, "sample_count": len(sample),
                 "paint_index_counts": dict(sorted(indices.items())[:30]),
+                "per_paint_index_prices": per_index,
                 "prices_observed": len(prices),
                 "price_min_raw": min(prices) if prices else None,
                 "price_max_raw": max(prices) if prices else None,
