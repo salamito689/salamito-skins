@@ -30,6 +30,8 @@ jobs:
         run: python scripts/test_uuskins_sku.py
       - name: Build sanitized staging listing feed
         run: python scripts/build_uuskins_feed.py
+      - name: Validate staging feed integrity
+        run: python scripts/validate_uuskins_feed.py
       - name: Upload isolated SKU preview artifact
         if: success()
         uses: actions/upload-artifact@v4
