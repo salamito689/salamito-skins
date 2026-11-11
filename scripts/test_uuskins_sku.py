@@ -210,6 +210,27 @@ def main():
         code = payload.get("code")
         if name == "AK-47 | Redline (Field-Tested)" and inspect_example is None and code in (0, 200):
             inspect_example = first_inspect_link(payload.get("data"))
+        if name == models[0] and code in (0, 200):
+            # Only key names and structural types, never sensitive values.
+            def structure_keys(obj, prefix="data", depth=0):
+                found = []
+                if depth > 3 or len(found) >= 80:
+                    return found
+                if isinstance(obj, dict):
+                    for key, value in list(obj.items())[:35]:
+                        key_name = str(key)
+                        if not __import__("re").fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,50}", key_name):
+                            continue
+                        field = prefix + "." + key_name
+                        found.append({"path": field, "type": type(value).__name__})
+                        if isinstance(value, dict):
+                            found.extend(structure_keys(value, field, depth + 1))
+                        elif isinstance(value, list) and value and isinstance(value[0], dict):
+                            found.extend(structure_keys(value[0], field + "[]", depth + 1))
+                return found[:80]
+            print("UUSKINS_SCHEMA_DIAGNOSTIC " + json.dumps({
+                "model": name, "fields": structure_keys(payload.get("data"))
+            }, ensure_ascii=False))
         sample = safe_samples(payload.get("data"))
         phase_diagnostics = {
             "sample_count": len(sample),
