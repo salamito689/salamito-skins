@@ -243,6 +243,27 @@ def main():
                 "sample_is_truncated": len(full_items) > 20,
                 "note": "Response item count, not total market stock"
             }, ensure_ascii=False))
+        if name in ("★ Bayonet | Autotronic (Field-Tested)", "★ Talon Knife | Doppler (Factory New)") and code in (0, 200):
+            from collections import Counter
+            bands = ((0.15, 0.18), (0.18, 0.21), (0.21, 0.24), (0.24, 0.27),
+                     (0.27, 0.30), (0.30, 0.33), (0.33, 0.38))
+            counts = {}
+            for row in full_items or []:
+                try:
+                    wear = float(row.get("wearValue"))
+                    if not __import__("math").isfinite(wear):
+                        continue
+                except (TypeError, ValueError, AttributeError):
+                    continue
+                phase = phase_for_model(name, row.get("paintIndex")) if "Doppler" in name else "standard"
+                band = next((f"{lo:.2f}-{hi:.2f}" for lo, hi in bands if lo <= wear < hi), "other")
+                key = str(phase or "unknown") + "/" + band
+                counts[key] = counts.get(key, 0) + 1
+            print("UUSKINS_TARGET_COVERAGE " + json.dumps({
+                "model": name, "returned": len(full_items or []),
+                "candidate_counts_by_phase_and_float": counts,
+                "note": "Only returned first batch; not global market inventory"
+            }, ensure_ascii=False))
         sample = safe_samples(payload.get("data"))
         phase_diagnostics = {
             "sample_count": len(sample),
