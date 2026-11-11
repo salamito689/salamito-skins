@@ -47,7 +47,7 @@ def inspect_metadata(row):
         if match:
             payload = match.group(1)
             break
-    if re.fullmatch(r"[0-9a-fA-F]{24,}", payload):
+    # Steam preview hex commonly uses a leading A before the hex bytes.\n    if re.fullmatch(r"A[0-9a-fA-F]{24,}", payload, re.I):\n        fmt = "hex_payload"\n    elif re.fullmatch(r"[0-9a-fA-F]{24,}", payload):
         fmt = "hex_payload"
     elif re.fullmatch(r"[SM]\\d+A\\d+D\\d+", payload, re.I):
         fmt = "legacy_asset"
@@ -64,7 +64,7 @@ def inspect_metadata(row):
         "has_fragment": bool(parsed.fragment),
         "has_encoded_spaces": "%20" in link.lower() or "+" in link,
         "has_legacy_token": bool(re.search(r"[SM]\\d+A\\d+D\\d+", value, re.I)),
-        "has_hex_token": bool(re.search(r"(?<![0-9a-fA-F])[0-9a-fA-F]{24,}(?![0-9a-fA-F])", value)),
+        "has_hex_token": bool(re.search(r"(?<![0-9a-fA-F])[0-9a-fA-F]{24,}(?![0-9a-fA-F])", value)),\n        "payload_prefix": "A_hex" if re.fullmatch(r"A[0-9a-fA-F]{24,}", payload, re.I) else ("hex" if re.fullmatch(r"[0-9a-fA-F]{24,}", payload) else "other"),
     }
     return diagnostic
 
