@@ -1,8 +1,4 @@
-"""Prepare a self-contained static UUSKINS staging preview for isolated hosting.
-
-Never publishes to GitHub Pages or production. The output is a downloadable
-artifact only. Source must have passed feed validation in the workflow.
-"""
+"""Package a local-only HTTP staging preview. Never deploys production."""
 from pathlib import Path
 import json
 import shutil
@@ -23,33 +19,33 @@ def main():
     OUT.mkdir(exist_ok=True)
     shutil.copyfile(HTML, OUT / "index.html")
     shutil.copyfile(FEED, OUT / "uuskins-feed-staging.json")
-    (OUT / "iniciar-servidor.bat").write_text(
-        "@echo off\\r\\n"
-        "cd /d \\"%~dp0\\"\\r\\n"
-        "where py >nul 2>nul\\r\\n"
-        "if %errorlevel%==0 (\\r\\n"
-        "  start \\"\\" \\"http://localhost:8765\\"\\r\\n"
-        "  py -3 -m http.server 8765 --bind 127.0.0.1\\r\\n"
-        ") else (\\r\\n"
-        "  where python >nul 2>nul\\r\\n"
-        "  if %errorlevel%==0 (\\r\\n"
-        "    start \\"\\" \\"http://localhost:8765\\"\\r\\n"
-        "    python -m http.server 8765 --bind 127.0.0.1\\r\\n"
-        "  ) else (\\r\\n"
-        "    echo Python nao encontrado. Instale Python 3 ou execute python -m http.server 8765 nesta pasta.\\r\\n"
-        "    pause\\r\\n"
-        "  )\\r\\n"
-        ")\\r\\n",
-        encoding="utf-8",
-    )
+    launcher = """@echo off
+cd /d "%~dp0"
+where py >nul 2>nul
+if %errorlevel%==0 (
+  start "" "http://127.0.0.1:8765"
+  py -3 -m http.server 8765 --bind 127.0.0.1
+) else (
+  where python >nul 2>nul
+  if %errorlevel%==0 (
+    start "" "http://127.0.0.1:8765"
+    python -m http.server 8765 --bind 127.0.0.1
+  ) else (
+    echo Python 3 nao encontrado. Instale Python 3 para executar este teste.
+    pause
+  )
+)
+"""
+    (OUT / "iniciar-servidor.bat").write_bytes(launcher.replace("\n", "\r\n").encode("utf-8"))
     (OUT / "README.txt").write_text(
-        "Salamito Skins — isolated UUSKINS staging preview\\n"
-        "Experimental only. No purchases, no reservations, currency unverified.\\n"
-        "Windows: execute iniciar-servidor.bat (requires Python 3).\\n"\n        "The server binds only to 127.0.0.1:8765 and opens the preview in a browser.\\n"\n        "Keep the console open during testing; Ctrl+C to stop.\\n"
-        "This artifact is NOT deployed to the production catalog.\\n",
+        "Salamito Skins — isolated UUSKINS staging preview\n"
+        "Experimental only. No purchases, reservations or validated currency.\n"
+        "Windows: double-click iniciar-servidor.bat (requires Python 3).\n"
+        "Preview opens at http://127.0.0.1:8765; keep console open during testing.\n"
+        "Press Ctrl+C in console to stop. Not deployed to production.\n",
         encoding="utf-8",
     )
-    print("Isolated static preview packaged (not published).")
+    print("Isolated static HTTP preview packaged (not published).")
 
 if __name__ == "__main__":
     main()
