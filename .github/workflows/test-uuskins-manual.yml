@@ -37,6 +37,14 @@ jobs:
         run: python scripts/build_uuskins_feed.py
       - name: Validate staging feed integrity
         run: python scripts/validate_uuskins_feed.py
+      - name: Package isolated static preview (no deployment)
+        run: python scripts/package_uuskins_preview.py
+      - name: Upload ready-to-preview static staging bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: uuskins-static-staging-preview
+          path: uuskins-staging-preview/
+          retention-days: 3
       - name: Upload isolated SKU preview artifact
         if: success()
         uses: actions/upload-artifact@v4
