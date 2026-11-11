@@ -107,6 +107,8 @@ def phase_for_model(model, index):
         return None
     if "Gamma Doppler" in model:
         return GAMMA_PHASE_BY_PAINT_INDEX.get(value)
+    if "Talon Knife" in model and "Doppler" in model:
+        return {852: "Phase 1", 853: "Phase 2", 854: "Phase 3", 855: "Phase 4", **DOPPLER_PHASE_BY_PAINT_INDEX}.get(value)
     if "Doppler" in model:
         return DOPPLER_PHASE_BY_PAINT_INDEX.get(value)
     return None
