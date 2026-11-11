@@ -47,7 +47,7 @@ def main():
         raise SystemExit("Invalid/missing secret formats")
     private_key = serialization.load_pem_private_key(pem.encode(), password=None)
     results = []
-    for name in ("Spectrum 2 Case", "Prisma Case"):
+    for name in ("AK-47 | Redline (Field-Tested)", "AWP | Asiimov (Field-Tested)"):
         params = {"appKey": app_key, "marketHashName": name}
         canonical = "".join(k + json.dumps(v, ensure_ascii=False, separators=(",", ":"))
                             for k, v in sorted(params.items()) if v is not None)
