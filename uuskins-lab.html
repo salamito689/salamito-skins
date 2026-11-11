@@ -9,7 +9,7 @@
 <div class="notice"><b>AMBIENTE EXPERIMENTAL — SEM COMPRAS.</b> Os preços estão na moeda original da API, ainda não validada. Nenhuma conversão em reais, reserva ou pedido é efetuado. Dados carregados manualmente podem estar desatualizados.</div>
 <div class="upload"><label for="file">Carregar anúncios de teste:</label> <input id="file" type="file" accept=".json,application/json"></div>
 <p id="status" role="status">Nenhum arquivo carregado.</p>
-<div class="layout"><section><div class="section-heading"><h2>Anúncios individuais</h2><span class="eyebrow">Seleção por unidade</span></div><div class="filters"><input id="search" type="search" placeholder="Buscar AK-47, AWP..." aria-label="Buscar skin"><select id="sort" aria-label="Ordenar anúncios"><option value="price">Menor preço</option><option value="float">Menor float</option><option value="seed">Paint seed crescente</option><option value="name">Nome A–Z</option></select></div><p id="shown" class="small"></p><div id="list" class="grid"></div></section>
+<div class="layout"><section><div class="section-heading"><h2>Anúncios individuais</h2><span class="eyebrow">Seleção por unidade</span></div><div class="filters"><input id="search" type="search" placeholder="Buscar skin..." aria-label="Buscar skin"><select id="model" aria-label="Selecionar modelo"><option value="">Todas as skins</option></select><select id="variant" aria-label="Selecionar fase"><option value="">Todas as fases</option></select><select id="floatRange" aria-label="Selecionar faixa de float"><option value="">Todos os floats</option><option value="0.00:0.07">0.00 até 0.07</option><option value="0.07:0.15">0.07 até 0.15</option><option value="0.15:0.18">0.15 até 0.18</option><option value="0.18:0.21">0.18 até 0.21</option><option value="0.21:0.24">0.21 até 0.24</option><option value="0.24:0.27">0.24 até 0.27</option><option value="0.27:0.30">0.27 até 0.30</option><option value="0.30:0.33">0.30 até 0.33</option><option value="0.33:0.38">0.33 até 0.38</option><option value="0.38:0.45">0.38 até 0.45</option><option value="0.45:1.00">0.45 até 1.00</option></select></div><p id="shown" class="small"></p><div id="list" class="grid"></div></section>
 <aside class="cart"><h2>Minha seleção (<span id="qty">0</span>)</h2><p class="cart-count">Anúncios específicos escolhidos</p><div id="cart"></div><div class="cart-footer"><p class="small">Seleção local para demonstração. Não reserva itens nem garante preço ou disponibilidade.</p><button disabled title="Checkout desabilitado">Finalizar compra (indisponível)</button></div></aside></div>
 </main><script>
 "use strict";
@@ -38,14 +38,54 @@ function addGameInspect(parent,item){
  parent.append(link);
 }
 function shortId(v){const s=String(v);return s.length>14?s.slice(0,8)+"…"+s.slice(-5):s}
+const DOPPLER_PHASES={415:"Ruby",416:"Sapphire",417:"Black Pearl",418:"Phase 1",419:"Phase 2",420:"Phase 3",421:"Phase 4"};
+const GAMMA_PHASES={568:"Emerald",569:"Phase 1",570:"Phase 2",571:"Phase 3",572:"Phase 4"};
+function phaseOf(item){
+ if(item.name.includes("Gamma Doppler"))return GAMMA_PHASES[Number(item.index)]||"Fase não identificada";
+ if(item.name.includes("Doppler"))return DOPPLER_PHASES[Number(item.index)]||"Fase não identificada";
+ return "Padrão";
+}
+function refreshModelOptions(){
+ const select=$("model"),previous=select.value;
+ select.replaceChildren(new Option("Todas as skins",""));
+ for(const name of [...new Set(listings.map(x=>x.name))].sort((a,b)=>a.localeCompare(b,"pt-BR")))select.add(new Option(name,name));
+ select.value=[...select.options].some(x=>x.value===previous)?previous:"";
+ refreshVariantOptions();
+}
+function refreshVariantOptions(){
+ const select=$("variant"),previous=select.value,model=$("model").value;
+ const phases=[...new Set(listings.filter(x=>!model||x.name===model).map(phaseOf))].filter(x=>x!=="Padrão");
+ select.replaceChildren(new Option("Todas as fases",""));
+ for(const phase of phases.sort((a,b)=>a.localeCompare(b,"pt-BR")))select.add(new Option(phase,phase));
+ select.value=[...select.options].some(x=>x.value===previous)?previous:"";
+}
 function render(){
  $("list").replaceChildren();$("cart").replaceChildren();$("qty").textContent=cart.size;
  const query=$("search").value.trim().toLocaleLowerCase("pt-BR");
- const shown=listings.filter(item=>item.name.toLocaleLowerCase("pt-BR").includes(query));
- const numeric=(v)=>{if(v===null||v===undefined||v==="")return Infinity;const n=Number(v);return Number.isFinite(n)?n:Infinity};
- const sort=$("sort").value;
- shown.sort((a,b)=>sort==="name"?a.name.localeCompare(b.name,"pt-BR"):sort==="float"?numeric(a.float)-numeric(b.float):sort==="seed"?numeric(a.seed)-numeric(b.seed):numeric(a.price)-numeric(b.price));
- $("shown").textContent=shown.length+" de "+listings.length+" anúncios exibidos";
+ const model=$("model").value,variant=$("variant").value,range=$("floatRange").value;
+ const bounds=range?range.split(":").map(Number):null;
+ const filtered=listings.filter(item=>{
+  if(!item.name.toLocaleLowerCase("pt-BR").includes(query))return false;
+  if(model&&item.name!==model)return false;
+  if(variant&&phaseOf(item)!==variant)return false;
+  if(bounds){
+   if(item.float===null||item.float===undefined||item.float==="")return false;
+   const wear=Number(item.float);
+   if(!Number.isFinite(wear)||wear<bounds[0]||!(wear<bounds[1]||(bounds[1]===1&&wear===1)))return false;
+  }
+  return true;
+ });
+ filtered.sort((a,b)=>Number(a.price)-Number(b.price)||Number(a.float)-Number(b.float)||a.id.localeCompare(b.id));
+ // Bound each model/phase selection to ten; when all models are visible,
+ // group independently to avoid one model crowding out the others.
+ const counts=new Map(),shown=[];
+ for(const item of filtered){
+  const key=item.name+"|"+phaseOf(item);
+  const count=counts.get(key)||0;
+  if(count>=10)continue;
+  counts.set(key,count+1);shown.push(item);
+ }
+ $("shown").textContent=shown.length+" anúncios exibidos de "+filtered.length+" candidatos nesta seleção (máximo 10 por modelo/fase). Valores limitados à amostra da API.";
  if(!shown.length)addText($("list"),"p",listings.length?"Nenhum anúncio corresponde à busca.":"Carregue um JSON para começar.","empty");
  if(!cart.size){const empty=document.createElement("div");empty.className="cart-empty";addText(empty,"b","Sua seleção está vazia");addText(empty,"span","Escolha uma skin para visualizar os detalhes aqui.");$("cart").append(empty)}
  for(const item of shown){
@@ -67,7 +107,7 @@ function render(){
   addText(priceBox,"div","Preço original · moeda não confirmada","currency-note");
   body.append(priceBox);
   const dl=document.createElement("dl");
-  for(const [label,value] of [["Float",shortFloat(item.float)],["Paint seed",item.seed],["Paint index",item.index],["Anúncio",shortId(item.id)]]){
+  for(const [label,value] of [["Fase",phaseOf(item)],["Float",shortFloat(item.float)],["Paint seed",item.seed],["Paint index",item.index],["Anúncio",shortId(item.id)]]){
    addText(dl,"dt",label);const dd=addText(dl,"dd",fmt(value));if(label==="Anúncio")dd.title=String(item.id);
   }
   body.append(dl);
@@ -95,7 +135,9 @@ function render(){
  }
 }
 $("search").addEventListener("input",render);
-$("sort").addEventListener("change",render);
+$("model").addEventListener("change",()=>{refreshVariantOptions();render()});
+$("variant").addEventListener("change",render);
+$("floatRange").addEventListener("change",render);
 function loadFeed(data){
  if(!data||data.schema_version!==1||!Array.isArray(data.listings)||data.checkout_enabled!==false||data.currency!=="unverified")throw Error("Feed experimental inválido");
  const parsed=[];
@@ -107,7 +149,7 @@ function loadFeed(data){
   parsed.push({id,key:id,name:String(x.market_hash_name||"Skin"),price,
    float:x.float,seed:x.paint_seed,index:x.paint_index,image:verifiedLocalImage(x.exact_image_file),inspectCode:validEmbedCode(x.inspect_embed_code)?x.inspect_embed_code:null});
  }
- listings=Array.from(new Map(parsed.map(x=>[x.key,x])).values());cart.clear();render();
+ listings=Array.from(new Map(parsed.map(x=>[x.key,x])).values());cart.clear();refreshModelOptions();render();
  const fetched=Date.parse(data.fetched_at);
  const age=Number.isFinite(fetched)?Math.max(0,Date.now()-fetched):Infinity;
  $("status").textContent=listings.length+" anúncios do feed de testes. "+
