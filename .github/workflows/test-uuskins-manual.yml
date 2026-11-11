@@ -21,6 +21,18 @@ jobs:
           python-version: '3.12'
       - name: Run offline feed regression tests
         run: python -m unittest discover -s tests -p 'test_uuskins_feed.py' -v
+      - name: Test guarded UUSKINS Wise pricing offline
+        run: python -m unittest discover -s tests -p 'test_uuskins_price_math.py' -v
+      - name: Fetch two Wise quotes (staging only)
+        env:
+          WISE_API_TOKEN: ${{ secrets.WISE_API_TOKEN }}
+        run: python scripts/fetch_uuskins_wise_staging.py
+      - name: Upload Wise staging quotes (not production)
+        uses: actions/upload-artifact@v4
+        with:
+          name: uuskins-wise-staging-quotes
+          path: uuskins-wise-quotes-staging.json
+          retention-days: 1
       - name: Install signing dependency
         run: python -m pip install 'cryptography>=43,<47'
       - name: Query UUSKINS market data (read-only)
