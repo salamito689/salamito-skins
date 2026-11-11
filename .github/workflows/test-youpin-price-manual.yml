@@ -1,0 +1,25 @@
+name: Youpin RMB individual price probe (manual, read-only)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: youpin-price-probe
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Checkout isolated staging branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/uuskins-safe-integration
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate price parser offline
+        run: python -m unittest discover -s tests -p 'test_youpin_price.py' -v
+      - name: Query one public Youpin listing (no login, no secrets)
+        run: python scripts/probe_youpin_price.py 'https://api.youpin898.com/api/youpin/commodity/detail/share?Id=2097902427' 2097902427
