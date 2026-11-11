@@ -23,21 +23,21 @@ def main():
             status = response.status
     except urllib.error.HTTPError as exc:
         print(json.dumps({"endpoint": "querySaleTemplate", "status": "http_error", "http_code": exc.code, "no_retry": True}))
-        return
+        raise SystemExit(2) from None
     except (urllib.error.URLError, TimeoutError) as exc:
         print(json.dumps({"endpoint": "querySaleTemplate", "status": "network_error", "error_type": type(exc).__name__}))
-        return
+        raise SystemExit(2) from None
     if len(data) > 100000:
         print(json.dumps({"endpoint": "querySaleTemplate", "status": "response_too_large"}))
-        return
+        raise SystemExit(2)
     try:
         result = json.loads(data)
     except ValueError:
         print(json.dumps({"endpoint": "querySaleTemplate", "status": "non_json", "http_code": status}))
-        return
+        raise SystemExit(2)
     if not isinstance(result, dict):
         print(json.dumps({"endpoint": "querySaleTemplate", "status": "unexpected_schema"}))
-        return
+        raise SystemExit(2)
     print(json.dumps({
         "endpoint": "querySaleTemplate", "http_code": status,
         "api_code": result.get("code", result.get("Code")),
@@ -46,6 +46,8 @@ def main():
         "verified_individual_listing_ids": False,
         "note": "Schema discovery only; no market feed published",
     }, ensure_ascii=False))
+    if result.get("code", result.get("Code")) not in (0, "0"):
+        raise SystemExit(2)
 
 if __name__ == "__main__":
     main()
