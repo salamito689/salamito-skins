@@ -49,6 +49,20 @@ jobs:
         run: python scripts/build_uuskins_feed.py
       - name: Validate staging feed integrity
         run: python scripts/validate_uuskins_feed.py
+      - name: Build explicitly labeled BRL simulation (USD assumption only)
+        env:
+          UUSKINS_STAGING_ASSUME_USD: '1'
+        run: python scripts/build_uuskins_brl_staging.py
+      - name: Render searchable BRL simulation (local artifact only)
+        run: python scripts/render_uuskins_brl_simulation.py
+      - name: Upload isolated BRL simulation (never production)
+        uses: actions/upload-artifact@v4
+        with:
+          name: uuskins-brl-simulation-unverified-usd
+          path: |
+            uuskins-prices-brl-staging.json
+            uuskins-brl-simulation.html
+          retention-days: 2
       - name: Package isolated static preview (no deployment)
         run: python scripts/package_uuskins_preview.py
       - name: Upload ready-to-preview static staging bundle
