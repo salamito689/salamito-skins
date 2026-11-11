@@ -19,6 +19,21 @@ def main():
     OUT.mkdir(exist_ok=True)
     shutil.copyfile(HTML, OUT / "index.html")
     shutil.copyfile(FEED, OUT / "uuskins-feed-staging.json")
+    # Exact-item images are opt-in and must be independently verified against SKU ID.
+    # Never fall back to a generic model picture.
+    image_dir = ROOT / "exact-images"
+    if image_dir.is_dir():
+        output_images = OUT / "exact-images"
+        output_images.mkdir(exist_ok=True)
+        for item in data["listings"]:
+            name = item.get("exact_image_file")
+            if not isinstance(name, str) or not name.isascii():
+                continue
+            if not name.replace("_", "").replace("-", "").replace(".", "").isalnum() or not name.lower().endswith((".webp", ".avif", ".png")):
+                continue
+            source = image_dir / name
+            if source.is_file() and source.stat().st_size <= 2_000_000:
+                shutil.copyfile(source, output_images / name)
     launcher = """@echo off
 cd /d "%~dp0"
 where py >nul 2>nul
