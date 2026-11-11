@@ -9,8 +9,8 @@ from datetime import datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 
 MAX_FX_AGE_SECONDS = 3600
-SPREAD_BRL_PER_CNY = Decimal("0.025")
-DELIVERY_FEE = Decimal("0.01")
+DEFAULT_SPREAD_BRL_PER_CNY = Decimal("0.025")
+DEFAULT_DELIVERY_FEE_PERCENT = Decimal("1")
 
 def decimal(value):
     if isinstance(value, bool):
@@ -23,7 +23,7 @@ def decimal(value):
         raise ValueError("Nonfinite number")
     return d
 
-def price_quote(price_rmb, fx):
+def price_quote(price_rmb, fx, spread_brl_per_cny=DEFAULT_SPREAD_BRL_PER_CNY, delivery_fee_percent=DEFAULT_DELIVERY_FEE_PERCENT):
     if fx.get("pair") != "CNY/BRL" or fx.get("source") != "Wise API":
         raise ValueError("Expected Wise CNY/BRL quote")
     rate = decimal(fx.get("rate"))
@@ -38,34 +38,28 @@ def price_quote(price_rmb, fx):
     amount = decimal(price_rmb)
     if not Decimal("0") < amount < Decimal("10000000"):
         raise ValueError("Invalid listing price")
-    effective = rate + SPREAD_BRL_PER_CNY
+    spread = decimal(spread_brl_per_cny)
+    fee_percent = decimal(delivery_fee_percent)
+    if not Decimal("0") <= spread <= Decimal("1") or not Decimal("0") <= fee_percent <= Decimal("100"):
+        raise ValueError("Invalid pricing configuration")
+    effective = rate + spread
     base = amount * effective
-    total = (base * (Decimal("1") + DELIVERY_FEE)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    total = (base * (Decimal("1") + fee_percent / Decimal("100"))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     return {"currency": "BRL", "source_currency": "CNY", "price_rmb": str(amount),
-            "wise_rate": str(rate), "spread_brl_per_cny": str(SPREAD_BRL_PER_CNY),
-            "effective_rate": str(effective), "delivery_fee_percent": "1",
+            "wise_rate": str(rate), "spread_brl_per_cny": str(spread),
+            "effective_rate": str(effective), "delivery_fee_percent": str(fee_percent),
             "subtotal_brl": str(base.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)),
             "estimated_cost_brl": str(total), "sell_price_brl": None,
             "status": "staging_estimate_not_for_checkout"}
-
-def selling_price(cost_brl, markup_percent):
-    """Optional markup on total acquisition/delivery cost, not profit margin on revenue."""
-    cost = decimal(cost_brl)
-    markup = decimal(markup_percent)
-    if cost <= 0 or not Decimal("0") <= markup <= Decimal("100"):
-        raise ValueError("Invalid cost or markup")
-    result = (cost * (Decimal("1") + markup / Decimal("100"))).quantize(
-        Decimal("0.01"), rounding=ROUND_HALF_UP)
-    return {"cost_brl": str(cost), "markup_percent": str(markup),
-            "sell_price_brl": str(result), "gross_profit_brl": str(result - cost),
-            "status": "staging_only"}
 
 if __name__ == "__main__":
     import argparse
     p = argparse.ArgumentParser()
     p.add_argument("--rmb", required=True)
     p.add_argument("--fx", default="fx.json")
+    p.add_argument("--spread", default="0.025")
+    p.add_argument("--delivery-fee-percent", default="1")
     a = p.parse_args()
     with open(a.fx, encoding="utf-8") as file:
         fx = json.load(file)
-    print(json.dumps(price_quote(a.rmb, fx), ensure_ascii=False, indent=2))
+    print(json.dumps(price_quote(a.rmb, fx, a.spread, a.delivery_fee_percent), ensure_ascii=False, indent=2))
