@@ -1,0 +1,60 @@
+name: UUSKINS staging auto validation
+on:
+  push:
+    branches:
+      - feature/uuskins-safe-integration
+    paths:
+      - 'scripts/test_uuskins.py'
+      - 'scripts/test_uuskins_sku.py'
+      - 'scripts/build_uuskins_feed.py'
+      - 'scripts/validate_uuskins_feed.py'
+      - 'scripts/package_uuskins_preview.py'
+      - 'tests/test_uuskins_*.py'
+      - '.github/workflows/uuskins-staging-auto.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: uuskins-staging-auto
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline UUSKINS tests
+        run: python -m unittest discover -s tests -p 'test_uuskins_feed.py' -v
+      - name: Install signing dependency
+        run: python -m pip install 'cryptography>=43,<47'
+      - name: Read-only market summary
+        env:
+          UUSKINS_APP_KEY: ${{ secrets.UUSKINS_APP_KEY }}
+          UUSKINS_PRIVATE_KEY_PEM: ${{ secrets.UUSKINS_PRIVATE_KEY_PEM }}
+        run: python scripts/test_uuskins.py
+      - name: Read-only individual listings and Doppler phase diagnostics
+        env:
+          UUSKINS_APP_KEY: ${{ secrets.UUSKINS_APP_KEY }}
+          UUSKINS_PRIVATE_KEY_PEM: ${{ secrets.UUSKINS_PRIVATE_KEY_PEM }}
+        run: python scripts/test_uuskins_sku.py
+      - name: Build staging-only feed
+        run: python scripts/build_uuskins_feed.py
+      - name: Validate staging feed
+        run: python scripts/validate_uuskins_feed.py
+      - name: Package preview without deployment
+        run: python scripts/package_uuskins_preview.py
+      - name: Upload diagnostics and preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: uuskins-auto-staging-preview
+          path: |
+            uuskins-preview.json
+            uuskins-sku-preview.json
+            uuskins-feed-staging.json
+            uuskins-staging-preview/
+          retention-days: 3
