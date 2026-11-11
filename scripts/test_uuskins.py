@@ -25,15 +25,22 @@ def main():
     except ImportError as exc:
         raise SystemExit("Install cryptography: pip install cryptography") from exc
 
+    if not app_key.isdecimal():
+        raise RuntimeError("AppKey format unexpected: expected numeric application ID.")
+    if not pem.startswith("-----BEGIN PRIVATE KEY-----") or not pem.endswith("-----END PRIVATE KEY-----"):
+        raise RuntimeError("Private key PEM format unexpected; verify GitHub secret.")
     params = {"appKey": app_key, "pageIndex": 1, "pageSize": 20}
     canonical = "".join(
         key + json.dumps(value, ensure_ascii=False, separators=(",", ":"))
         for key, value in sorted(params.items()) if value is not None
     )
     private_key = serialization.load_pem_private_key(pem.encode("utf-8"), password=None)
-    signature = base64.b64encode(
-        private_key.sign(canonical.encode("utf-8"), padding.PKCS1v15(), hashes.SHA256())
-    ).decode("ascii")
+    signed_bytes = canonical.encode("utf-8")
+    raw_signature = private_key.sign(signed_bytes, padding.PKCS1v15(), hashes.SHA256())
+    private_key.public_key().verify(raw_signature, signed_bytes, padding.PKCS1v15(), hashes.SHA256())
+    print("Credential format: valid; local RSA SHA-256 signing and verification: passed")
+    print("Request: market hash list, pageIndex=1, pageSize=20, read-only")
+    signature = base64.b64encode(raw_signature).decode("ascii")
     body = json.dumps({**params, "sign": signature}, ensure_ascii=False).encode("utf-8")
     request = urllib.request.Request(
         BASE_URL + PATH, data=body, method="POST",
@@ -49,7 +56,10 @@ def main():
         raise RuntimeError("Unexpected UUSKINS response format")
     code = payload.get("code")
     if code not in (0, 200):
-        raise RuntimeError(f'UUSKINS application code: {code}; possible permission, signature or server failure. No production data changed.')
+        message = str(payload.get("message") or payload.get("msg") or "").strip().lower()
+        known = {"sign error", "invalid sign", "signature error", "invalid signature", "appkey error", "invalid appkey", "invalid app key", "permission denied", "unauthorized", "forbidden", "internal server error"}
+        diagnostic = message if message in known else "unclassified"
+        raise RuntimeError(f"UUSKINS application code: {code}; safe diagnostic: {diagnostic}. No production data changed.")
     data = payload.get("data")
     if not isinstance(data, dict) or not isinstance(data.get("items"), list):
         raise RuntimeError("Unexpected UUSKINS market data shape; preview not saved")
