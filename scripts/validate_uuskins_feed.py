@@ -13,6 +13,8 @@ def main():
     data = json.loads(FEED.read_text(encoding="utf-8"))
     assert data.get("schema_version") == 1, "Unsupported schema"
     assert data.get("currency") == "unverified", "Currency needs independent validation"
+    assert data.get("required_source_currency") == "CNY", "Only original CNY listing prices are acceptable for promotion"
+    assert data.get("cny_source_price_verified") is False, "CNY source price has not been independently verified"
     assert data.get("checkout_enabled") is False, "Checkout must stay disabled"
     coverage = data.get("coverage")
     assert isinstance(coverage, dict), "Coverage declaration required"
