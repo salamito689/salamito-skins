@@ -87,6 +87,15 @@ function render(){
   counts.set(key,count+1);shown.push(item);
  }
  $("shown").textContent=shown.length+" anúncios exibidos de "+filtered.length+" candidatos nesta seleção (máximo 10 por modelo/fase). "+(bounds&&shown.length<10?"Atenção: esta faixa tem apenas "+shown.length+" anúncio(s) na amostra recebida; podem existir outros no mercado. ":"")+"Valores limitados à amostra da API, sem garantia de menor preço global.";
+ if(bounds&&listings.length){
+  const availableForModel=listings.filter(item=>(!model||item.name===model)&&(!variant||phaseOf(item)===variant)&&item.float!==null&&item.float!==undefined&&item.float!=="");
+  const inBand=availableForModel.filter(item=>{const wear=Number(item.float);return Number.isFinite(wear)&&wear>=bounds[0]&&(wear<bounds[1]||(bounds[1]===1&&wear===1));});
+  const note=document.createElement("p");note.className="notice";note.setAttribute("role","status");
+  note.textContent=inBand.length
+   ? "Faixa "+bounds[0].toFixed(2).replace(".",",")+"–"+bounds[1].toFixed(2).replace(".",",")+": "+inBand.length+" anúncio(s) encontrados na consulta recebida. Mostramos até 10, pelo menor preço da amostra. A quantidade total no mercado pode ser maior."
+   : "Nenhum anúncio desta faixa veio na consulta recebida. Isso NÃO significa estoque zerado na UUSKINS/Youpin.";
+  $("list").append(note);
+ }
  if(!shown.length)addText($("list"),"p",listings.length?"Nenhum anúncio encontrado na amostra recebida. Isso não significa que esteja esgotado no mercado.":"Carregue um JSON para começar.","empty");
  if(!cart.size){const empty=document.createElement("div");empty.className="cart-empty";addText(empty,"b","Sua seleção está vazia");addText(empty,"span","Escolha uma skin para visualizar os detalhes aqui.");$("cart").append(empty)}
  for(const item of shown){
