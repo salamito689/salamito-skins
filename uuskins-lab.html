@@ -69,6 +69,7 @@ function render(){
   body.append(dl);
   const btn=document.createElement("button");btn.textContent=cart.has(item.key)?"✓ Adicionado":"＋ Adicionar à seleção";
   btn.disabled=cart.has(item.key);btn.addEventListener("click",()=>{cart.set(item.key,item);render()});body.append(btn);
+  if(validEmbedCode(item.inspectCode)){const inspect=document.createElement("button");inspect.type="button";inspect.className="inspect-btn";inspect.textContent="◈ Visualizar unidade em 3D";inspect.addEventListener("click",()=>openInspect(item));body.append(inspect)}
   card.append(body);$("list").append(card);
  }
  for(const item of cart.values()){
