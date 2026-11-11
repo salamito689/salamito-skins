@@ -14,7 +14,7 @@
 </main><script>
 "use strict";
 const $=id=>document.getElementById(id);
-let listings=[],cart=new Map();
+let listings=[],cart=new Map(),coverageComplete=false;
 const fmt=v=>v===null||v===undefined||v===""?"Não informado":String(v);
 function field(x,...names){for(const name of names){if(x[name]!==undefined&&x[name]!==null)return x[name]}return null}
 function addText(el,tag,text,cls){const n=document.createElement(tag);n.textContent=String(text);if(cls)n.className=cls;el.append(n);return n}
@@ -87,7 +87,7 @@ function render(){
   counts.set(key,count+1);shown.push(item);
  }
  $("shown").textContent=shown.length+" anúncios exibidos de "+filtered.length+" candidatos nesta seleção (máximo 10 por modelo/fase). "+(bounds&&shown.length<10?"Atenção: esta faixa tem apenas "+shown.length+" anúncio(s) na amostra recebida; podem existir outros no mercado. ":"")+"Valores limitados à amostra da API, sem garantia de menor preço global.";
- if(!shown.length)addText($("list"),"p",listings.length?"Nenhum anúncio corresponde à busca.":"Carregue um JSON para começar.","empty");
+ if(!shown.length)addText($("list"),"p",listings.length?"Nenhum anúncio encontrado na amostra recebida. Isso não significa que esteja esgotado no mercado.":"Carregue um JSON para começar.","empty");
  if(!cart.size){const empty=document.createElement("div");empty.className="cart-empty";addText(empty,"b","Sua seleção está vazia");addText(empty,"span","Escolha uma skin para visualizar os detalhes aqui.");$("cart").append(empty)}
  for(const item of shown){
   const card=document.createElement("article");card.className="card";
@@ -150,7 +150,7 @@ function loadFeed(data){
   parsed.push({id,key:id,name:String(x.market_hash_name||"Skin"),price,
    float:x.float,seed:x.paint_seed,index:x.paint_index,image:verifiedLocalImage(x.exact_image_file),inspectCode:validEmbedCode(x.inspect_embed_code)?x.inspect_embed_code:null});
  }
- listings=Array.from(new Map(parsed.map(x=>[x.key,x])).values());cart.clear();refreshModelOptions();render();
+ coverageComplete=data.coverage?.global_cheapest_verified===true; listings=Array.from(new Map(parsed.map(x=>[x.key,x])).values());cart.clear();refreshModelOptions();render();
  const fetched=Date.parse(data.fetched_at);
  const age=Number.isFinite(fetched)?Math.max(0,Date.now()-fetched):Infinity;
  $("status").textContent=listings.length+" anúncios do feed de testes. "+
@@ -172,8 +172,8 @@ function loadPreview(data){
     float:field(x,"wearValue","float","floatValue"),seed:field(x,"paintSeed"),index:field(x,"paintIndex"),image:verifiedLocalImage(x.exact_image_file),inspectCode:validEmbedCode(x.inspect_embed_code)?x.inspect_embed_code:null});
   }
  }
- listings=Array.from(new Map(parsed.map(x=>[x.key,x])).values());
- cart.clear();render();
+ coverageComplete=false;listings=Array.from(new Map(parsed.map(x=>[x.key,x])).values());
+ cart.clear();refreshModelOptions();render();
  const fetched=Date.parse(data.fetched_at);
  const age=Number.isFinite(fetched)?Math.max(0,Date.now()-fetched):NaN;
  const ageText=Number.isFinite(age)?(" Consulta de "+new Date(fetched).toLocaleString("pt-BR")+"."):" Data da consulta desconhecida.";
