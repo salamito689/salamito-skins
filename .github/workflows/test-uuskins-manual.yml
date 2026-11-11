@@ -28,6 +28,8 @@ jobs:
           UUSKINS_APP_KEY: ${{ secrets.UUSKINS_APP_KEY }}
           UUSKINS_PRIVATE_KEY_PEM: ${{ secrets.UUSKINS_PRIVATE_KEY_PEM }}
         run: python scripts/test_uuskins_sku.py
+      - name: Build sanitized staging listing feed
+        run: python scripts/build_uuskins_feed.py
       - name: Upload isolated SKU preview artifact
         if: success()
         uses: actions/upload-artifact@v4
@@ -35,6 +37,7 @@ jobs:
           name: uuskins-sku-read-only-preview
           path: |
             uuskins-sku-preview.json
+            uuskins-feed-staging.json
             uuskins-lab.html
           retention-days: 3
       - name: Upload isolated preview artifact
