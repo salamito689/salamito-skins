@@ -26,6 +26,29 @@ class TestSelector(unittest.TestCase):
         self.assertTrue(all(.15 <= r["float"] < .18 for r in first))
         self.assertTrue(all(.18 <= r["float"] < .21 for r in second))
 
+    def test_survival_forest_ddpat_partial_inventory_reference(self):
+        # Reproduce the observed first 20 UUSKINS listings, not full Youpin stock.
+        name = "★ Survival Knife | Forest DDPAT (Field-Tested)"
+        bands = [
+            (.15, .18, 1), (.18, .21, 3), (.21, .24, 2),
+            (.24, .27, 2), (.27, .30, 1), (.30, .33, 4),
+            (.33, .38, 7),
+        ]
+        rows = []
+        for band_index, (minimum, maximum, count) in enumerate(bands):
+            for i in range(count):
+                rows.append(self.row(f"{band_index}-{i}", (minimum + maximum) / 2,
+                                     100 + (count - i), name))
+        self.assertEqual(len(rows), 20)
+        for minimum, maximum, expected in bands:
+            with self.subTest(minimum=minimum, maximum=maximum):
+                selected = selector.select_listings(rows, name, minimum, maximum)
+                self.assertEqual(len(selected), expected)
+                self.assertEqual([x["price_original"] for x in selected],
+                                 sorted(x["price_original"] for x in selected))
+        self.assertEqual(selector.select_listings(rows, name, .00, .15), [])
+        self.assertEqual(len(selector.select_listings(rows, name, .15, .38)), 10)
+
     def test_phase_separation(self):
         name = "★ Talon Knife | Doppler (Factory New)"
         rows = [self.row(1, .01, 90, name, 418), self.row(2, .01, 70, name, 419)]
