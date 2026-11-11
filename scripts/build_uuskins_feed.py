@@ -113,6 +113,19 @@ def main():
             })
     if not result:
         raise ValueError("No valid individual listings; no feed generated")
+    # Per-model sample coverage is diagnostic only, never a market stock count.
+    model_coverage = {}
+    for group in raw.get("results", []):
+        if not isinstance(group, dict):
+            continue
+        model = group.get("market_hash_name")
+        if not isinstance(model, str) or not model:
+            continue
+        model_coverage[model] = {
+            "query_status": group.get("status") if group.get("status") in ("ok", "http_error", "network_or_json_error", "unexpected_shape") else "unknown",
+            "valid_listings_in_feed": sum(1 for item in result if item["market_hash_name"] == model),
+            "market_stock_complete": False,
+        }
     feed = {
         "schema_version": 1,
         "source": "UUSKINS staging, read-only",
@@ -121,6 +134,7 @@ def main():
         "currency": "unverified",
         "checkout_enabled": False,
         "listing_count": len(result),
+        "model_coverage": model_coverage,
         "coverage": {"scope": "first_returned_batch_per_model", "global_cheapest_verified": False, "source_pagination_verified": False, "note": "Do not interpret an empty float/phase filter as zero market stock."},
         "listings": result
     }
