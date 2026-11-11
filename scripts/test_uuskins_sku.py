@@ -262,6 +262,28 @@ def main():
                 band = next((f"{lo:.2f}-{hi:.2f}" for lo, hi in bands if lo <= wear < hi), "other")
                 key = str(phase or "unknown") + "/" + band
                 counts[key] = counts.get(key, 0) + 1
+            # Verify whether the returned batch itself is price-ordered and whether
+            # any requested float band has enough candidates for ten listings.
+            raw_prices = []
+            for row in full_items or []:
+                try:
+                    price = float(row.get("price"))
+                    if __import__("math").isfinite(price) and price > 0:
+                        raw_prices.append(price)
+                except (TypeError, ValueError, AttributeError):
+                    continue
+            print("UUSKINS_SOURCE_ORDER_DIAGNOSTIC " + json.dumps({
+                "model": name,
+                "valid_prices": len(raw_prices),
+                "nondecreasing_raw_prices": len(raw_prices) > 1 and all(
+                    a <= b for a, b in zip(raw_prices, raw_prices[1:])
+                ),
+                "bands_with_ten_candidates": sorted(
+                    band for band in {key.split("/")[-1] for key in counts}
+                    if sum(value for key, value in counts.items() if key.endswith("/" + band)) >= 10
+                ),
+                "note": "Only this API response; cannot establish globally cheapest listings"
+            }, ensure_ascii=False))
             print("UUSKINS_TARGET_COVERAGE " + json.dumps({
                 "model": name, "returned": len(full_items or []),
                 "candidate_counts_by_phase_and_float": counts,
