@@ -7,6 +7,7 @@ import json
 import os
 import pathlib
 import urllib.request
+import urllib.error
 from datetime import datetime, timezone
 
 BASE_URL = "https://api.uuskins.com"
@@ -38,13 +39,17 @@ def main():
         BASE_URL + PATH, data=body, method="POST",
         headers={"Content-Type": "application/json", "Accept": "application/json", "User-Agent": "SalamitoSkins/1.0"}
     )
-    with urllib.request.urlopen(request, timeout=30) as response:
-        payload = json.load(response)
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            print(f'UUSKINS HTTP status: {response.status}')
+            payload = json.load(response)
+    except urllib.error.HTTPError as exc:
+        raise RuntimeError(f'UUSKINS HTTP status: {exc.code}; no production data changed') from None
     if not isinstance(payload, dict):
         raise RuntimeError("Unexpected UUSKINS response format")
     code = payload.get("code")
     if code not in (0, 200):
-        raise RuntimeError("UUSKINS query was not successful; check API permissions/signature (response code: %s)" % code)
+        raise RuntimeError(f'UUSKINS application code: {code}; possible permission, signature or server failure. No production data changed.')
     data = payload.get("data")
     if not isinstance(data, dict) or not isinstance(data.get("items"), list):
         raise RuntimeError("Unexpected UUSKINS market data shape; preview not saved")
