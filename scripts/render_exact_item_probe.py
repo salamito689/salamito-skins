@@ -17,8 +17,12 @@ META = pathlib.Path("uuskins-exact-item-render-result.json")
 
 def main():
     inspect = os.environ.get("CS2_INSPECT_LINK", "").strip()
+    if not inspect:
+        sample = pathlib.Path("uuskins-one-inspect-link.txt")
+        if sample.is_file():
+            inspect = next((line.strip() for line in sample.read_text(encoding="utf-8").splitlines() if line.strip().startswith("steam://")), "")
     key = os.environ.get("INSPEKT_SECRET_KEY", "").strip()
-    if not inspect.startswith("steam://rungame/730/"):
+    if not (inspect.startswith("steam://rungame/730/") or inspect.startswith("steam://run/730/")):
         raise SystemExit("CS2_INSPECT_LINK must be an exact steam://rungame/730 inspect link")
     if "csgo_econ_action_preview" not in urllib.parse.unquote(inspect).lower():
         raise SystemExit("Inspect command missing")
@@ -44,7 +48,7 @@ def main():
     if status != 200 or content_type != "image/webp" or len(data) > 3_000_000:
         raise SystemExit("Render was not a valid 200 image/webp response")
     # Inspekt can return an inaccurate default-item placeholder. Never accept it.
-    if notes and any(word in notes.lower() for word in ("placeholder", "default wear", "not rendered")):
+    if notes and any(word in notes.lower() for word in ("placeholder", "default wear", "not rendered", "outside", "missing", "dropped", "ignored", "failed")):
         raise SystemExit("Provider returned a placeholder; exact-item image rejected")
     if not data.startswith(b"RIFF") or data[8:12] != b"WEBP":
         raise SystemExit("Unexpected image bytes")
