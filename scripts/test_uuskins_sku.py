@@ -28,17 +28,30 @@ def describe(obj, depth=0):
     return {"type": type(obj).__name__}
 
 def inspect_metadata(row):
-    """Describe inspect-link presence without exporting asset identifiers or tokens."""
+    """Classify inspection URL format without exporting its item or asset identifiers.
+
+    Hex-payload links can potentially be rendered without a Steam client.
+    Legacy S/A/D or M/A/D links require separate resolution.
+    """
     link = row.get("inspectUrl") or row.get("inspect_url")
     if not isinstance(link, str) or not link.strip():
-        return {"inspect_available": False, "inspect_scheme": None, "inspect_host": None}
-    parsed = urlparse(link.strip())
-    allowed_scheme = parsed.scheme.lower() in ("steam", "https")
-    return {
-        "inspect_available": bool(allowed_scheme and parsed.netloc),
-        "inspect_scheme": parsed.scheme.lower() if allowed_scheme else "unsupported",
-        "inspect_host": parsed.hostname.lower()[:100] if parsed.hostname and parsed.scheme.lower() == "https" else None,
-    }
+        return {"inspect_available": False, "inspect_format": "missing"}
+    from urllib.parse import unquote
+    value = unquote(link.strip())
+    parsed = urlparse(value)
+    if parsed.scheme.lower() not in ("steam", "https") or not parsed.netloc:
+        return {"inspect_available": False, "inspect_format": "unsupported"}
+    import re
+    match = re.search(r"csgo_econ_action_preview\\s+([^\\s&#]+)", value, re.IGNORECASE)
+    payload = match.group(1) if match else ""
+    if re.fullmatch(r"[0-9a-fA-F]{24,}", payload):
+        fmt = "hex_payload"
+    elif re.fullmatch(r"[SM]\\d+A\\d+D\\d+", payload, re.IGNORECASE):
+        fmt = "legacy_asset"
+    else:
+        fmt = "unknown"
+    return {"inspect_available": True, "inspect_format": fmt}
+
 
 def safe_samples(obj):
     if isinstance(obj, list):
