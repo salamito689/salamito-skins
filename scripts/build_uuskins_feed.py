@@ -142,6 +142,8 @@ def main():
         "fetched_at": fetched.isoformat(),
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "currency": "unverified",
+        "required_source_currency": "CNY",
+        "cny_source_price_verified": False,
         "checkout_enabled": False,
         "listing_count": len(result),
         "model_coverage": model_coverage,
