@@ -344,55 +344,15 @@ def main():
                 "currency_hints": phase_diagnostics["currency_fields"],
                 "warning": "Raw price currency unverified; phase mapping diagnostic only; sample is not total stock",
             }, ensure_ascii=False))
-    # Bounded pagination probe on one model only. Never merge unverified pages into the feed.
-    # Compare item IDs across pages to detect APIs that ignore pageIndex/pageSize.
-    pagination = []
-    probe_model = models[0]
-    for page in (1, 2):
-        params = {"appKey": app_key, "marketHashName": probe_model, "pageIndex": page, "pageSize": 10}
-        canonical = "".join(k + json.dumps(v, ensure_ascii=False, separators=(",", ":"))
-                            for k, v in sorted(params.items()) if v is not None)
-        signature = base64.b64encode(private_key.sign(canonical.encode(), padding.PKCS1v15(), hashes.SHA256())).decode()
-        req = urllib.request.Request(URL, data=json.dumps({**params, "sign": signature}, ensure_ascii=False).encode(),
-                                     method="POST", headers={"Content-Type": "application/json", "Accept": "application/json",
-                                                             "User-Agent": "SalamitoSkins/1.0"})
-        try:
-            with urllib.request.urlopen(req, timeout=30) as response:
-                payload = json.load(response)
-                status = response.status
-            if not isinstance(payload, dict) or payload.get("code") not in (0, 200):
-                pagination.append({"page": page, "status": "application_error",
-                                   "application_code": payload.get("code") if isinstance(payload, dict) and isinstance(payload.get("code"), (int, str)) else None,
-                                   "message_category": ("pagination_parameter_rejected" if isinstance(payload, dict) and any(term in str(payload.get("message") or payload.get("msg") or "").lower() for term in ("page", "parameter", "invalid", "参数")) else "other")})
-                continue
-            rows = safe_samples(payload.get("data"))
-            ids = [str(row.get("id") or row.get("skuId") or row.get("sku_id")) for row in rows
-                   if row.get("id") is not None or row.get("skuId") is not None or row.get("sku_id") is not None]
-            data = payload.get("data")
-            meta = {key: data[key] for key in ("pageIndex", "pageSize", "total", "totalCount", "count", "pages", "hasNext")
-                    if isinstance(data, dict) and key in data and isinstance(data[key], (int, float, bool, str))}
-            pagination.append({"page": page, "status": "ok", "http": status, "rows": len(rows),
-                               "ids": ids, "metadata": meta})
-        except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, ValueError):
-            pagination.append({"page": page, "status": "request_error"})
-    if len(pagination) == 2 and all(p["status"] == "ok" for p in pagination):
-        first, second = pagination
-        overlap = len(set(first["ids"]) & set(second["ids"]))
-        result = {"model": probe_model, "requested_page_size": 10,
-                  "page_1_rows": first["rows"], "page_2_rows": second["rows"],
-                  "page_1_unique_ids": len(set(first["ids"])),
-                  "page_2_unique_ids": len(set(second["ids"])),
-                  "overlapping_ids": overlap,
-                  "pagination_supported": bool(first["ids"] and second["ids"] and overlap == 0 and
-                                               first["rows"] <= 10 and second["rows"] <= 10),
-                  "metadata": [first["metadata"], second["metadata"]],
-                  "note": "Diagnostic only; API pagination not trusted until verified"}
-    else:
-        result = {"model": probe_model, "status": "inconclusive",
-                  "page_statuses": [p["status"] for p in pagination],
-                  "application_codes": [p.get("application_code") for p in pagination],
-                  "message_categories": [p.get("message_category") for p in pagination]}
-    print("UUSKINS_PAGINATION_DIAGNOSTIC " + json.dumps(result, ensure_ascii=False))
+    # Previous read-only probes with pageIndex/pageSize returned application
+    # code 400. Do not repeatedly send rejected/undocumented parameters.
+    # Pagination remains unsupported until UUSKINS confirms its contract.
+    print("UUSKINS_PAGINATION_DIAGNOSTIC " + json.dumps({
+        "status": "unverified",
+        "previous_probe": "pageIndex/pageSize rejected with application code 400",
+        "pagination_supported": False,
+        "note": "No undocumented pagination request attempted; await provider specification"
+    }, ensure_ascii=False))
     # Currency: report only field names and explicit hints; no assumption from price magnitudes.
     print("UUSKINS_CURRENCY_DIAGNOSTIC " + json.dumps({
         "explicit_currency_fields": sorted({v for group in results for v in
