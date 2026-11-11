@@ -1,6 +1,6 @@
 import unittest
 from datetime import datetime, timezone
-from scripts.youpin_price_math import price_quote
+from scripts.youpin_price_math import price_quote, selling_price
 
 class PriceMathTests(unittest.TestCase):
     def fx(self):
@@ -10,6 +10,12 @@ class PriceMathTests(unittest.TestCase):
         result = price_quote("100", self.fx())
         self.assertEqual(result["estimated_cost_brl"], "83.33")
         self.assertIsNone(result["sell_price_brl"])
+    def test_delivery_fee_label(self):
+        self.assertEqual(price_quote("100", self.fx())["delivery_fee_percent"], "1")
+    def test_optional_markup(self):
+        self.assertEqual(selling_price("100", "10")["sell_price_brl"], "110.00")
+    def test_invalid_markup(self):
+        with self.assertRaises(ValueError): selling_price("100", "-1")
     def test_reject_wrong_pair(self):
         f = self.fx(); f["pair"]="USD/BRL"
         with self.assertRaises(ValueError): price_quote("100", f)
