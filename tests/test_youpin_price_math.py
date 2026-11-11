@@ -1,6 +1,6 @@
 import unittest
 from datetime import datetime, timezone
-from scripts.youpin_price_math import price_quote, selling_price
+from scripts.youpin_price_math import price_quote
 
 class PriceMathTests(unittest.TestCase):
     def fx(self):
@@ -12,10 +12,16 @@ class PriceMathTests(unittest.TestCase):
         self.assertIsNone(result["sell_price_brl"])
     def test_delivery_fee_label(self):
         self.assertEqual(price_quote("100", self.fx())["delivery_fee_percent"], "1")
-    def test_optional_markup(self):
-        self.assertEqual(selling_price("100", "10")["sell_price_brl"], "110.00")
-    def test_invalid_markup(self):
-        with self.assertRaises(ValueError): selling_price("100", "-1")
+    def test_custom_spread_and_fee(self):
+        result = price_quote("100", self.fx(), "0.05", "2")
+        self.assertEqual(result["estimated_cost_brl"], "86.70")
+        self.assertEqual(result["spread_brl_per_cny"], "0.05")
+        self.assertEqual(result["delivery_fee_percent"], "2")
+    def test_reject_invalid_configuration(self):
+        with self.assertRaises(ValueError):
+            price_quote("100", self.fx(), "-0.01", "1")
+        with self.assertRaises(ValueError):
+            price_quote("100", self.fx(), "0.025", "-1")
     def test_reject_wrong_pair(self):
         f = self.fx(); f["pair"]="USD/BRL"
         with self.assertRaises(ValueError): price_quote("100", f)
