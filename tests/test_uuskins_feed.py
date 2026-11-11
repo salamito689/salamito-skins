@@ -36,6 +36,8 @@ class TestFeedParsing(unittest.TestCase):
             "status": "ok", "market_hash_name": "AK-47 | Redline (Field-Tested)",
             "sample_listings": [
                 {"id": "invalid", "price": "NaN"},
+                {"id": "missing_float", "price": "20.00"},
+                {"id": "bad_float", "price": "20.00", "wearValue": "NaN"},
                 {"id": "valid", "price": "24.52", "wearValue": "0.3447971343994140600", "paintSeed": "440", "paintIndex": "282"},
                 {"id": "valid", "price": "25.00"}
             ]
