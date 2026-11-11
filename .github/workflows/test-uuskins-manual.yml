@@ -23,6 +23,18 @@ jobs:
           UUSKINS_APP_KEY: ${{ secrets.UUSKINS_APP_KEY }}
           UUSKINS_PRIVATE_KEY_PEM: ${{ secrets.UUSKINS_PRIVATE_KEY_PEM }}
         run: python scripts/test_uuskins.py
+      - name: Query individual SKU listings (read-only)
+        env:
+          UUSKINS_APP_KEY: ${{ secrets.UUSKINS_APP_KEY }}
+          UUSKINS_PRIVATE_KEY_PEM: ${{ secrets.UUSKINS_PRIVATE_KEY_PEM }}
+        run: python scripts/test_uuskins_sku.py
+      - name: Upload isolated SKU preview artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: uuskins-sku-read-only-preview
+          path: uuskins-sku-preview.json
+          retention-days: 3
       - name: Upload isolated preview artifact
         if: success()
         uses: actions/upload-artifact@v4
