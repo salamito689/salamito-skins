@@ -7,7 +7,7 @@
 <header><strong class="logo">Salamito <span>Skins</span></strong> · Laboratório de anúncios</header>
 <main class="wrap"><h1>Seleção de skins por anúncio</h1>
 <div class="notice"><b>AMBIENTE EXPERIMENTAL — SEM COMPRAS.</b> Os preços estão na moeda original da API, ainda não validada. Nenhuma conversão em reais, reserva ou pedido é efetuado. Dados carregados manualmente podem estar desatualizados.</div>
-<p>Selecione o arquivo <code>uuskins-sku-preview.json</code> extraído do artefato do GitHub Actions. Os anúncios são exibidos apenas no seu navegador.</p>
+<p>Selecione <code>uuskins-feed-staging.json</code> (recomendado) ou <code>uuskins-sku-preview.json</code> extraído do artefato do GitHub Actions. Os anúncios são exibidos apenas no seu navegador.</p>
 <label for="file">Arquivo JSON do teste:</label> <input id="file" type="file" accept=".json,application/json">
 <p id="status" role="status">Nenhum arquivo carregado.</p>
 <div class="layout"><section><h2>Anúncios individuais</h2><div class="filters"><input id="search" type="search" placeholder="Buscar AK-47, AWP..." aria-label="Buscar skin"><select id="sort" aria-label="Ordenar anúncios"><option value="price">Menor preço</option><option value="float">Menor float</option><option value="seed">Paint seed crescente</option><option value="name">Nome A–Z</option></select></div><p id="shown" class="small"></p><div id="list" class="grid"></div></section>
@@ -51,6 +51,23 @@ function render(){
 }
 $("search").addEventListener("input",render);
 $("sort").addEventListener("change",render);
+function loadFeed(data){
+ if(!data||data.schema_version!==1||!Array.isArray(data.listings)||data.checkout_enabled!==false||data.currency!=="unverified")throw Error("Feed experimental inválido");
+ const parsed=[];
+ for(const x of data.listings){
+  if(!x||typeof x!=="object"||x.id===undefined||x.id===null)continue;
+  const price=Number(x.price_original);
+  if(!Number.isFinite(price)||price<=0)continue;
+  const id=String(x.id);
+  parsed.push({id,key:id,name:String(x.market_hash_name||"Skin"),price,
+   float:x.float,seed:x.paint_seed,index:x.paint_index});
+ }
+ listings=Array.from(new Map(parsed.map(x=>[x.key,x])).values());cart.clear();render();
+ const fetched=Date.parse(data.fetched_at);
+ const age=Number.isFinite(fetched)?Math.max(0,Date.now()-fetched):Infinity;
+ $("status").textContent=listings.length+" anúncios do feed de testes. "+
+  (age>15*60*1000?"ATENÇÃO: dados antigos, sem garantia de preço ou disponibilidade.":"Dados de demonstração, não são em tempo real.");
+}
 function loadPreview(data){
  if(!data||!Array.isArray(data.results))throw Error("Formato inválido: esperado results[]");
  const parsed=[];
@@ -79,15 +96,16 @@ $("file").addEventListener("change",async event=>{
  const file=event.target.files[0];if(!file)return;
  try{
   if(file.size>3_000_000)throw Error("Arquivo muito grande (máximo 3 MB)");
-  loadPreview(JSON.parse(await file.text()));
+  const data=JSON.parse(await file.text());
+  if(data.schema_version===1)loadFeed(data);else loadPreview(data);
  }catch(err){listings=[];cart.clear();render();$("status").textContent="Não foi possível carregar: "+err.message}
 });
 // Automatic loading is available only when served over HTTP(S), not file://.
 // Never fetch merchant credentials or invoke signed API calls in the browser.
 if(location.protocol==="http:"||location.protocol==="https:"){
- fetch("./uuskins-sku-preview.json",{cache:"no-store"}).then(response=>{
+ fetch("./uuskins-feed-staging.json",{cache:"no-store"}).then(response=>{
   if(!response.ok)throw Error("Arquivo de demonstração indisponível");
   return response.json();
- }).then(loadPreview).catch(()=>{$("status").textContent="Selecione o JSON para visualizar os anúncios de teste."});
+ }).then(loadFeed).catch(()=>{$("status").textContent="Selecione o JSON para visualizar os anúncios de teste."});
 }
 </script></body></html>
