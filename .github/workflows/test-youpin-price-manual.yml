@@ -21,5 +21,9 @@ jobs:
           python-version: '3.12'
       - name: Validate price parser offline
         run: python -m unittest discover -s tests -p 'test_youpin_price.py' -v
+      - name: Validate batch input limits offline
+        run: python -m unittest discover -s tests -p 'test_youpin_batch.py' -v
       - name: Query one public Youpin listing (no login, no secrets)
         run: python scripts/probe_youpin_price.py 'https://api.youpin898.com/api/youpin/commodity/detail/share?Id=2097902427' 2097902427
+      - name: Exercise bounded batch probe with known listing
+        run: python -m scripts.probe_youpin_batch 2097902427
