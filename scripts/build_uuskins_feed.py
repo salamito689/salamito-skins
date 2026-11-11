@@ -93,6 +93,13 @@ def main():
                 continue
             if not math.isfinite(price) or not 0 < price < 10000000:
                 continue
+            model_name = item.get("steamHashName") or group.get("market_hash_name")
+            if not isinstance(model_name, str) or not model_name.strip():
+                continue
+            model_name = model_name.strip()[:200]
+            wear = parse_float(item.get("wearValue"))
+            if wear is None:
+                continue
             seen.add(identifier)
             code = item.get("inspect_embed_code")
             code = code.upper() if isinstance(code, str) and re.fullmatch(r"[0-9a-fA-F]{24,4096}", code) and len(code) % 2 == 0 else None
@@ -101,10 +108,10 @@ def main():
             exact_image = image_entry[0] if image_entry and image_entry[1] == fingerprint else None
             result.append({
                 "id": identifier,
-                "market_hash_name": str(item.get("steamHashName") or group.get("market_hash_name") or "")[:200],
+                "market_hash_name": model_name,
                 "price_original": price,
                 "exact_image_file": exact_image,
-                "float": parse_float(item.get("wearValue")),
+                "float": wear,
                 "paint_seed": parse_integer(item.get("paintSeed")),
                 "paint_index": parse_integer(item.get("paintIndex")),
                 "inspect_available": item.get("inspect_available") is True,
