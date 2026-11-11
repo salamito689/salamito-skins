@@ -67,7 +67,8 @@ def inspect_metadata(row):
         "has_fragment": bool(parsed.fragment),
         "has_encoded_spaces": "%20" in link.lower() or "+" in link,
         "has_legacy_token": bool(re.search(r"[SM]\\d+A\\d+D\\d+", value, re.I)),
-        "has_hex_token": bool(re.search(r"(?<![0-9a-fA-F])[0-9a-fA-F]{24,}(?![0-9a-fA-F])", value)),\n        "payload_prefix": "A_hex" if re.fullmatch(r"A[0-9a-fA-F]{24,}", payload, re.I) else ("hex" if re.fullmatch(r"[0-9a-fA-F]{24,}", payload) else "other"),
+        "has_hex_token": bool(re.search(r"(?<![0-9a-fA-F])[0-9a-fA-F]{24,}(?![0-9a-fA-F])", value)),
+        "payload_prefix": "A_hex" if re.fullmatch(r"A[0-9a-fA-F]{24,}", payload, re.I) else ("hex" if re.fullmatch(r"[0-9a-fA-F]{24,}", payload) else "other"),
     }
     return diagnostic
 
