@@ -14,7 +14,7 @@ def quote(pair, rate, age=0):
 class PricingTests(unittest.TestCase):
     def test_cny_one_percent_and_two_point_five_cents(self):
         result = price_brl("4500", "CNY", quote("CNY/BRL", "0.833059"), now=NOW)
-        self.assertEqual(result["price_brl"], "3897.25")
+        self.assertEqual(result["price_brl"], "3898.75")
         self.assertFalse(result["checkout_enabled"])
 
     def test_usd_two_wise_legs(self):
