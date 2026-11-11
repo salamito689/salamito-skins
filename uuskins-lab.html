@@ -19,6 +19,10 @@ const fmt=v=>v===null||v===undefined||v===""?"Não informado":String(v);
 function field(x,...names){for(const name of names){if(x[name]!==undefined&&x[name]!==null)return x[name]}return null}
 function addText(el,tag,text,cls){const n=document.createElement(tag);n.textContent=String(text);if(cls)n.className=cls;el.append(n);return n}
 function shortFloat(v){const n=Number(v);return v===null||v===undefined||v===""||!Number.isFinite(n)?"Não informado":n.toFixed(8)}
+function verifiedLocalImage(url){
+ if(typeof url!=="string"||!/^[a-zA-Z0-9_-]+\\.(webp|avif|png)$/.test(url))return null;
+ return "./exact-images/"+url;
+}
 function safeImage(url){if(typeof url!=="string")return null;try{const u=new URL(url);return u.protocol==="https:"&&["community.cloudflare.steamstatic.com","steamcommunity-a.akamaihd.net","community.akamai.steamstatic.com","steamcdn-a.akamaihd.net","steamcommunity.com","cdn.steamstatic.com"].includes(u.hostname)?u.href:null}catch{return null}}
 function validEmbedCode(code){return typeof code==="string"&&code.length>=24&&code.length<=4096&&code.length%2===0&&/^[a-fA-F0-9]+$/.test(code)}
 function inspectInGame(code){
@@ -51,7 +55,7 @@ function render(){
   const placeholder=document.createElement("div");placeholder.className="placeholder";
   addText(placeholder,"b","◇");addText(placeholder,"span","Imagem oficial indisponível");
   if(item.image){
-   const img=document.createElement("img");img.src=item.image;img.alt="Imagem do modelo "+item.name+" (não representa necessariamente o anúncio individual)";
+   const img=document.createElement("img");img.src=item.image;img.alt="Imagem estática verificada da unidade "+item.name;
    img.loading="lazy";img.referrerPolicy="no-referrer";img.addEventListener("error",()=>{img.remove();art.classList.remove("has-image");art.append(placeholder)});
    art.classList.add("has-image");art.append(img);
   }else art.append(placeholder);
@@ -77,7 +81,7 @@ function render(){
   const head=document.createElement("div");head.className="cart-item-head";
   const thumb=document.createElement("div");thumb.className="cart-thumb";
   if(item.image){
-   const img=document.createElement("img");img.src=item.image;img.alt="Miniatura do modelo "+item.name;img.loading="lazy";img.referrerPolicy="no-referrer";
+   const img=document.createElement("img");img.src=item.image;img.alt="Miniatura da unidade "+item.name;img.loading="lazy";img.referrerPolicy="no-referrer";
    img.addEventListener("error",()=>{img.remove();addText(thumb,"span","Sem imagem")});thumb.append(img);
   }else addText(thumb,"span","Sem imagem");
   head.append(thumb);const details=document.createElement("div");
@@ -101,7 +105,7 @@ function loadFeed(data){
   if(!Number.isFinite(price)||price<=0)continue;
   const id=String(x.id);
   parsed.push({id,key:id,name:String(x.market_hash_name||"Skin"),price,
-   float:x.float,seed:x.paint_seed,index:x.paint_index,image:safeImage(x.image_url),inspectCode:validEmbedCode(x.inspect_embed_code)?x.inspect_embed_code:null});
+   float:x.float,seed:x.paint_seed,index:x.paint_index,image:verifiedLocalImage(x.exact_image_file),inspectCode:validEmbedCode(x.inspect_embed_code)?x.inspect_embed_code:null});
  }
  listings=Array.from(new Map(parsed.map(x=>[x.key,x])).values());cart.clear();render();
  const fetched=Date.parse(data.fetched_at);
@@ -122,7 +126,7 @@ function loadPreview(data){
    const price=field(x,"price","salePrice","sellPrice");
    if(price===null||!Number.isFinite(Number(price))||Number(price)<0)continue;
    parsed.push({id:String(id),key:String(id),name:String(name),price,
-    float:field(x,"wearValue","float","floatValue"),seed:field(x,"paintSeed"),index:field(x,"paintIndex"),image:safeImage(field(x,"image_url","imageUrl")),inspectCode:validEmbedCode(x.inspect_embed_code)?x.inspect_embed_code:null});
+    float:field(x,"wearValue","float","floatValue"),seed:field(x,"paintSeed"),index:field(x,"paintIndex"),image:verifiedLocalImage(x.exact_image_file),inspectCode:validEmbedCode(x.inspect_embed_code)?x.inspect_embed_code:null});
   }
  }
  listings=Array.from(new Map(parsed.map(x=>[x.key,x])).values());
