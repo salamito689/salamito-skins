@@ -14,6 +14,11 @@ OUTPUT = Path("uuskins-prices-brl-staging.json")
 
 def main():
     currency = os.getenv("UUSKINS_VERIFIED_PRICE_CURRENCY", "").strip().upper()
+    simulation = os.getenv("UUSKINS_STAGING_ASSUME_USD", "") == "1"
+    if simulation and currency:
+        raise SystemExit("Simulation and verified currency are mutually exclusive")
+    if simulation:
+        currency = "USD"
     if currency not in ("USD", "CNY"):
         raise SystemExit("Currency not verified: set UUSKINS_VERIFIED_PRICE_CURRENCY only after authoritative confirmation")
     feed = json.loads(SOURCE.read_text(encoding="utf-8"))
@@ -35,7 +40,9 @@ def main():
     OUTPUT.write_text(json.dumps({
         "source": "UUSKINS + Wise staging, not for checkout",
         "source_currency": currency,
-        "currency_verification": "external_manual_required",
+        "currency_verification": "unverified_assumption_usd" if simulation else "external_manual_required",
+        "simulation_only": simulation,
+        "wise_quotes": {k: {"rate": v["rate"], "fetched_at": v["fetched_at"]} for k, v in quotes.items()},
         "production": False, "checkout_enabled": False,
         "listings": results
     }, ensure_ascii=False, indent=2), encoding="utf-8")
