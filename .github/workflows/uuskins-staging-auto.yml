@@ -4,6 +4,7 @@ on:
     branches:
       - feature/uuskins-safe-integration
     paths:
+      - 'uuskins-lab.html'
       - 'scripts/uuskins_listing_selector.py'
       - 'scripts/test_uuskins.py'
       - 'scripts/test_uuskins_sku.py'
@@ -31,6 +32,18 @@ jobs:
           python-version: '3.12'
       - name: Offline UUSKINS tests
         run: python -m unittest discover -s tests -p 'test_uuskins_*.py' -v
+      - name: Validate browser JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          html = Path("uuskins-lab.html").read_text(encoding="utf-8")
+          start = html.rfind("<script>")
+          end = html.rfind("</script>")
+          if start < 0 or end <= start:
+              raise SystemExit("Missing inline JavaScript")
+          Path("/tmp/uuskins-lab-check.js").write_text(html[start+8:end], encoding="utf-8")
+          PY
+          node --check /tmp/uuskins-lab-check.js
       - name: Install signing dependency
         run: python -m pip install 'cryptography>=43,<47'
       - name: Read-only market summary
