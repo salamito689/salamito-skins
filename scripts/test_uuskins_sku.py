@@ -28,29 +28,45 @@ def describe(obj, depth=0):
     return {"type": type(obj).__name__}
 
 def inspect_metadata(row):
-    """Classify inspection URL format without exporting its item or asset identifiers.
-
-    Hex-payload links can potentially be rendered without a Steam client.
-    Legacy S/A/D or M/A/D links require separate resolution.
-    """
+    """Classify inspect links and export only non-sensitive structural diagnostics."""
+    import re
+    from urllib.parse import unquote, parse_qs
     link = row.get("inspectUrl") or row.get("inspect_url")
     if not isinstance(link, str) or not link.strip():
         return {"inspect_available": False, "inspect_format": "missing"}
-    from urllib.parse import unquote
     value = unquote(link.strip())
     parsed = urlparse(value)
     if parsed.scheme.lower() not in ("steam", "https") or not parsed.netloc:
         return {"inspect_available": False, "inspect_format": "unsupported"}
-    import re
-    match = re.search(r"csgo_econ_action_preview\\s+([^\\s&#]+)", value, re.IGNORECASE)
-    payload = match.group(1) if match else ""
+    # Inspect Steam URLs can contain encoded spaces, slash-delimited commands,
+    # and preview tokens in the query or fragment.
+    candidates = [value, unquote(value), unquote(unquote(value))]
+    payload = ""
+    for candidate in candidates:
+        match = re.search(r"csgo_econ_action_preview(?:[\\s/+]|%20)+([^\\s&#/?]+)", candidate, re.I)
+        if match:
+            payload = match.group(1)
+            break
     if re.fullmatch(r"[0-9a-fA-F]{24,}", payload):
         fmt = "hex_payload"
-    elif re.fullmatch(r"[SM]\\d+A\\d+D\\d+", payload, re.IGNORECASE):
+    elif re.fullmatch(r"[SM]\\d+A\\d+D\\d+", payload, re.I):
         fmt = "legacy_asset"
     else:
         fmt = "unknown"
-    return {"inspect_available": True, "inspect_format": fmt}
+    # Only booleans and coarse structural categories: never print or save link,
+    # identifiers, query parameter values, or actual preview payloads.
+    diagnostic = {
+        "inspect_available": True,
+        "inspect_format": fmt,
+        "inspect_scheme": parsed.scheme.lower(),
+        "has_preview_command": "csgo_econ_action_preview" in value.lower(),
+        "has_query": bool(parsed.query),
+        "has_fragment": bool(parsed.fragment),
+        "has_encoded_spaces": "%20" in link.lower() or "+" in link,
+        "has_legacy_token": bool(re.search(r"[SM]\\d+A\\d+D\\d+", value, re.I)),
+        "has_hex_token": bool(re.search(r"(?<![0-9a-fA-F])[0-9a-fA-F]{24,}(?![0-9a-fA-F])", value)),
+    }
+    return diagnostic
 
 
 def safe_samples(obj):
