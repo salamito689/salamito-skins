@@ -55,6 +55,11 @@ class TestFeedParsing(unittest.TestCase):
         self.assertEqual(feed["listings"][0]["paint_seed"], 440)
         self.assertEqual(feed["listings"][0]["paint_index"], 282)
         self.assertEqual(feed["checkout_enabled"], False)
+        self.assertEqual(feed["currency"], "unverified")
+        self.assertEqual(feed["required_source_currency"], "CNY")
+        self.assertIs(feed["cny_source_price_verified"], False)
+        self.assertNotIn("price_cny", feed["listings"][0])
+        self.assertNotIn("price_brl", feed["listings"][0])
 
 if __name__ == "__main__":
     unittest.main()
