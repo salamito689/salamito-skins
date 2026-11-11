@@ -22,6 +22,8 @@ def variant_of(row):
         return None if "Doppler" in name else "standard"
     if "Gamma Doppler" in name:
         return GAMMA_PHASES.get(index)
+    if "Talon Knife" in name and "Doppler" in name:
+        return {852: "Phase 1", 853: "Phase 2", 854: "Phase 3", 855: "Phase 4", **DOPPLER_PHASES}.get(index)
     if "Doppler" in name:
         return DOPPLER_PHASES.get(index)
     return "standard"
