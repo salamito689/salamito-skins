@@ -47,7 +47,10 @@ def inspect_metadata(row):
         if match:
             payload = match.group(1)
             break
-    # Steam preview hex commonly uses a leading A before the hex bytes.\n    if re.fullmatch(r"A[0-9a-fA-F]{24,}", payload, re.I):\n        fmt = "hex_payload"\n    elif re.fullmatch(r"[0-9a-fA-F]{24,}", payload):
+    # Steam preview hex commonly uses a leading A before the hex bytes.
+    if re.fullmatch(r"A[0-9a-fA-F]{24,}", payload, re.I):
+        fmt = "hex_payload"
+    elif re.fullmatch(r"[0-9a-fA-F]{24,}", payload):
         fmt = "hex_payload"
     elif re.fullmatch(r"[SM]\\d+A\\d+D\\d+", payload, re.I):
         fmt = "legacy_asset"
