@@ -177,7 +177,7 @@ def main():
     private_key = serialization.load_pem_private_key(pem.encode(), password=None)
     results = []
     inspect_example = None
-    # Bounded read-only sampling: two established controls plus three Doppler models.
+    # Bounded read-only sampling: established controls, Doppler models, and the Survival Forest DDPAT reference.
     # Market hash names identify models, not Phase/Ruby/Sapphire; use paintIndex
     # and verified source fields before assigning a phase or publishing prices.
     models = (
@@ -188,6 +188,7 @@ def main():
         "★ Karambit | Gamma Doppler (Factory New)",
         "★ Bayonet | Autotronic (Field-Tested)",
         "★ Talon Knife | Doppler (Factory New)",
+        "★ Survival Knife | Forest DDPAT (Field-Tested)",
     )
     for name in models:
         params = {"appKey": app_key, "marketHashName": name}
