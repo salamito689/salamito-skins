@@ -43,7 +43,7 @@ def inspect_metadata(row):
     candidates = [value, unquote(value), unquote(unquote(value))]
     payload = ""
     for candidate in candidates:
-        match = re.search(r"csgo_econ_action_preview(?:[\\s/+]|%20)+([^\\s&#/?]+)", candidate, re.I)
+        match = re.search(r"csgo_econ_action_preview(?:[\s/+]|%20)+([^\s&#/?]+)", candidate, re.I)
         if match:
             payload = match.group(1)
             break
@@ -52,7 +52,7 @@ def inspect_metadata(row):
         fmt = "hex_payload"
     elif re.fullmatch(r"[0-9a-fA-F]{24,}", payload):
         fmt = "hex_payload"
-    elif re.fullmatch(r"[SM]\\d+A\\d+D\\d+", payload, re.I):
+    elif re.fullmatch(r"[SM]\d+A\d+D\d+", payload, re.I):
         fmt = "legacy_asset"
     else:
         fmt = "unknown"
@@ -66,7 +66,7 @@ def inspect_metadata(row):
         "has_query": bool(parsed.query),
         "has_fragment": bool(parsed.fragment),
         "has_encoded_spaces": "%20" in link.lower() or "+" in link,
-        "has_legacy_token": bool(re.search(r"[SM]\\d+A\\d+D\\d+", value, re.I)),
+        "has_legacy_token": bool(re.search(r"[SM]\d+A\d+D\d+", value, re.I)),
         "has_hex_token": bool(re.search(r"(?<![0-9a-fA-F])[0-9a-fA-F]{24,}(?![0-9a-fA-F])", value)),
         "payload_prefix": "A_hex" if re.fullmatch(r"A[0-9a-fA-F]{24,}", payload, re.I) else ("hex" if re.fullmatch(r"[0-9a-fA-F]{24,}", payload) else "other"),
     }
