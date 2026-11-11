@@ -317,6 +317,40 @@ def main():
                 "new_listing_detected": False,
                 "note": "Current sampled listings only; cannot identify newest without comparing snapshots"
             }, ensure_ascii=False))
+        if name == "★ Talon Knife | Doppler (Factory New)" and code in (0, 200):
+            matches = []
+            for row in full_items or []:
+                if not isinstance(row, dict):
+                    continue
+                try:
+                    wear = float(row.get("wearValue"))
+                    price = float(row.get("price"))
+                except (TypeError, ValueError):
+                    continue
+                if not (__import__("math").isfinite(wear) and 0.03 <= wear < 0.04
+                        and __import__("math").isfinite(price) and price > 0):
+                    continue
+                matches.append({
+                    "float": row.get("wearValue"),
+                    "pattern": row.get("paintSeed"),
+                    "price_raw": row.get("price"),
+                    "phase": phase_for_model(name, row.get("paintIndex")) or "unmapped",
+                    "paint_index": row.get("paintIndex"),
+                    "has_inspect": bool(row.get("inspectUrl"))
+                })
+            matches.sort(key=lambda item: float(item["price_raw"]))
+            print("UUSKINS_TALON_DOPPLER_003_004 " + json.dumps({
+                "observed_at_utc": datetime.now(timezone.utc).isoformat(),
+                "model": name,
+                "float_min_inclusive": 0.03,
+                "float_max_exclusive": 0.04,
+                "sample_size": len(full_items or []),
+                "matching_count_in_sample": len(matches),
+                "cheapest_ten_in_sample": matches[:10],
+                "currency": "unverified",
+                "market_coverage_complete": False,
+                "note": "All phases considered; first API batch only; not a full-market stock count"
+            }, ensure_ascii=False))
         sample = safe_samples(payload.get("data"))
         phase_diagnostics = {
             "sample_count": len(sample),
