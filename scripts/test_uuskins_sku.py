@@ -302,10 +302,17 @@ def main():
                     "price_raw": row.get("price"),
                     "has_inspect": bool(row.get("inspectUrl")),
                 })
+            # Stable digest lets us compare captures without printing listing IDs.
+            import hashlib
+            observed_ids = sorted(str(row.get("id")) for row in (full_items or [])
+                                  if isinstance(row, dict) and row.get("id") is not None)
+            snapshot_digest = hashlib.sha256("\\n".join(observed_ids).encode("utf-8")).hexdigest() if observed_ids else None
             print("UUSKINS_SURVIVAL_SNAPSHOT " + json.dumps({
                 "observed_at_utc": datetime.now(timezone.utc).isoformat(),
                 "model": name,
                 "first_five_by_source_order": snapshot,
+                "sample_listing_count": len(full_items or []),
+                "sample_id_set_sha256": snapshot_digest,
                 "currency": "unverified",
                 "new_listing_detected": False,
                 "note": "Current sampled listings only; cannot identify newest without comparing snapshots"
