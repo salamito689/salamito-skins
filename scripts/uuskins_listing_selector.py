@@ -29,14 +29,14 @@ def variant_of(row):
     return "standard"
 
 
-def select_listings(rows, market_hash_name, minimum, maximum, variant=None, limit=MAX_VISIBLE):
+def select_listings(rows, market_hash_name, minimum, maximum, variant=None, limit=MAX_VISIBLE, *, require_complete=False, coverage=None):
     """Select at most 10 cheapest candidates in [minimum, maximum).
 
     The last float range may explicitly end at 1.0, which is inclusive.
     The returned subset cannot establish global cheapest offers without source-side
     filters/sorting or exhaustive coverage.
     """
-    if not isinstance(market_hash_name, str) or not market_hash_name:
+    if type(require_complete) is not bool:\n        raise ValueError("require_complete must be boolean")\n    if require_complete:\n        if not isinstance(coverage, dict) or coverage.get("global_cheapest_verified") is not True or coverage.get("source_pagination_verified") is not True or coverage.get("scope") != "complete_market":\n            raise ValueError("Complete market coverage not independently verified; cannot claim global cheapest listings")\n    if not isinstance(market_hash_name, str) or not market_hash_name:
         raise ValueError("Market hash name required")
     if any(type(v) not in (int, float) or not math.isfinite(v) for v in (minimum, maximum)):
         raise ValueError("Invalid float range")
