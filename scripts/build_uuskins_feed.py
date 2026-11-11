@@ -2,6 +2,7 @@
 No credentials, checkout actions, currency conversion, or production writes.
 """
 import json
+import math
 import pathlib
 from datetime import datetime, timezone
 
@@ -9,6 +10,27 @@ SOURCE = pathlib.Path("uuskins-sku-preview.json")
 OUTPUT = pathlib.Path("uuskins-feed-staging.json")
 FIELDS = ("id", "skuId", "sku_id")
 MAX_AGE_SECONDS = 900
+
+def parse_float(value):
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return number if math.isfinite(number) and 0 <= number <= 1 else None
+
+def parse_integer(value):
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        text = str(value).strip()
+        if not text.isdecimal():
+            return None
+        number = int(text)
+    except (TypeError, ValueError):
+        return None
+    return number if 0 <= number <= 100000 else None
 
 def main():
     raw = json.loads(SOURCE.read_text(encoding="utf-8"))
@@ -41,16 +63,16 @@ def main():
                 price = float(value)
             except (ValueError, TypeError):
                 continue
-            if not 0 < price < 10000000:
+            if not math.isfinite(price) or not 0 < price < 10000000:
                 continue
             seen.add(identifier)
             result.append({
                 "id": identifier,
                 "market_hash_name": str(item.get("steamHashName") or group.get("market_hash_name") or "")[:200],
                 "price_original": price,
-                "float": item.get("wearValue") if isinstance(item.get("wearValue"), (float, int)) else None,
-                "paint_seed": item.get("paintSeed") if isinstance(item.get("paintSeed"), int) else None,
-                "paint_index": item.get("paintIndex") if isinstance(item.get("paintIndex"), int) else None
+                "float": parse_float(item.get("wearValue")),
+                "paint_seed": parse_integer(item.get("paintSeed")),
+                "paint_index": parse_integer(item.get("paintIndex"))
             })
     if not result:
         raise ValueError("No valid individual listings; no feed generated")
