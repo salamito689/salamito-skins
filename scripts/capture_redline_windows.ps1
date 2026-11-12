@@ -16,7 +16,7 @@ try { $hashBytes = $sha.ComputeHash([Text.Encoding]::ASCII.GetBytes($data.inspec
 finally { $sha.Dispose() }
 $hash = ([BitConverter]::ToString($hashBytes)).Replace("-", "").ToLowerInvariant()
 if ($hash -ne $data.inspect_sha256) { throw "Inspect payload fingerprint mismatch" }
-$inspectUrl = "steam://run/730//+csgo_econ_action_preview%20A$($data.inspect_hex)"
+$inspectUrl = "steam://run/730/en/+csgo_econ_action_preview%20$($data.inspect_hex)"
 Write-Host "Opening the exact UUSKINS item in Steam / CS2..."
 Start-Process $inspectUrl
 Write-Host "Inspect the item visually, including stickers and charms."
