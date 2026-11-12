@@ -18,7 +18,7 @@ class CatalogLayoutTests(unittest.TestCase):
         self.assertIn("transform:none;margin:auto;padding:9px", HTML)
         self.assertIn(".item.rarity-item .art img", HTML)
 
-    def test_price_labels_not_repeated(self):
+    def test_local_preview_loads_published_price_files(self):\n        self.assertIn('const PREVIEW_LOCAL=location.protocol==="file:"', HTML)\n        self.assertIn('PREVIEW_DATA_BASE+"prices.json"', HTML)\n        self.assertIn('PREVIEW_DATA_BASE:"")+"fx.json', HTML)\n\n    def test_price_labels_not_repeated(self):
         self.assertNotIn("Referência Buff163", HTML)
         self.assertNotIn("Preço estimado Salamito", HTML)
         self.assertIn("Catálogo em fase de testes", HTML)
