@@ -34,6 +34,7 @@ def main():
                              quotes["CNY/BRL"], quotes.get("USD/CNY"))
         results.append({"id": item["id"], "market_hash_name": item["market_hash_name"],
                         "float": item["float"], "paint_seed": item["paint_seed"],
+                        "inspect_embed_code": item.get("inspect_embed_code") if item.get("inspect_format") == "hex_payload" else None,
                         "raw_price": computed["raw_price"],
                         "source_currency": currency,
                         "price_brl": computed["price_brl"]})
