@@ -14,9 +14,9 @@ class CatalogLayoutTests(unittest.TestCase):
         self.assertIn("repeat(3,minmax(0,1fr))", HTML)
 
     def test_art_is_centered_and_no_vertical_offset(self):
-        self.assertIn("object-position:center center", HTML)
-        self.assertIn("transform:none;margin:auto;padding:9px", HTML)
-        self.assertIn(".item.rarity-item .art img", HTML)
+        self.assertIn("object-position:center bottom", HTML)
+        self.assertIn(".catalog-results .item.rarity-item .art{margin:0;width:100%", HTML)
+        self.assertNotIn("transform:none;margin:auto;padding:9px", HTML)
 
     def test_local_preview_loads_published_price_files(self):
         self.assertIn('const PREVIEW_LOCAL=location.protocol==="file:"', HTML)
