@@ -11,8 +11,10 @@ if ($data.model -ne "AK-47 | Redline (Field-Tested)") { throw "Unexpected item m
 if ($data.inspect_hex -notmatch '^[A-Fa-f0-9]{24,4096}$' -or ($data.inspect_hex.Length % 2) -ne 0) {
   throw "Invalid inspect payload"
 }
-$hashBytes = [System.Security.Cryptography.SHA256]::HashData([Text.Encoding]::ASCII.GetBytes($data.inspect_hex))
-$hash = [Convert]::ToHexString($hashBytes).ToLowerInvariant()
+$sha = [System.Security.Cryptography.SHA256]::Create()
+try { $hashBytes = $sha.ComputeHash([Text.Encoding]::ASCII.GetBytes($data.inspect_hex)) }
+finally { $sha.Dispose() }
+$hash = ([BitConverter]::ToString($hashBytes)).Replace("-", "").ToLowerInvariant()
 if ($hash -ne $data.inspect_sha256) { throw "Inspect payload fingerprint mismatch" }
 $inspectUrl = "steam://run/730//+csgo_econ_action_preview%20A$($data.inspect_hex)"
 Write-Host "Opening the exact UUSKINS item in Steam / CS2..."
