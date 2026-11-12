@@ -45,6 +45,14 @@ jobs:
           UUSKINS_APP_KEY: ${{ secrets.UUSKINS_APP_KEY }}
           UUSKINS_PRIVATE_KEY_PEM: ${{ secrets.UUSKINS_PRIVATE_KEY_PEM }}
         run: python scripts/test_uuskins_sku.py
+      - name: Audit native UUSKINS exact-image availability (no paid renderer)
+        run: python scripts/audit_uuskins_image_sources.py
+      - name: Upload UUSKINS image-source audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: uuskins-image-source-audit
+          path: uuskins-image-source-audit.json
+          retention-days: 3
       - name: Build sanitized staging listing feed
         run: python scripts/build_uuskins_feed.py
       - name: Validate staging feed integrity
