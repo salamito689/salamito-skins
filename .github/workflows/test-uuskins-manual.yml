@@ -119,28 +119,6 @@ jobs:
           path: uuskins-one-inspect-link.txt
           if-no-files-found: warn
           retention-days: 1
-      - name: Render one exact UUSKINS item (optional, staging only)
-        if: ${{ success() }}
-        env:
-          INSPEKT_SECRET_KEY: ${{ secrets.INSPEKT_SECRET_KEY }}
-        run: |
-          if [ -z "$INSPEKT_SECRET_KEY" ]; then
-            echo "Inspekt secret not configured; skip optional rendering."
-          elif [ ! -s uuskins-one-inspect-link.txt ]; then
-            echo "No inspect link available; skip optional rendering."
-          else
-            python scripts/render_exact_item_probe.py
-          fi
-      - name: Upload exact-item image for visual review (private artifact)
-        if: ${{ success() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: uuskins-exact-item-image-preview
-          path: |
-            uuskins-exact-item-preview.webp
-            uuskins-exact-item-render-result.json
-          if-no-files-found: ignore
-          retention-days: 1
       - name: Upload isolated preview artifact
         if: success()
         uses: actions/upload-artifact@v4
