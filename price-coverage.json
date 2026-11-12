@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-11-12T04:18:17.630101+00:00",
+  "generated_at": "2026-11-12T12:59:03.128717+00:00",
   "note": "Diagnostic based on exact catalog names; categories are approximate and may include items hidden in storefront. Missing does not mean unavailable on YouPin.",
   "total_checked": 47529,
-  "total_missing": 22391,
+  "total_missing": 22385,
   "categories": {
     "Adesivos": {
       "checked": 22268,
@@ -34,8 +34,8 @@
     },
     "Armas e skins": {
       "checked": 16917,
-      "missing": 5696,
-      "priced": 11221,
+      "missing": 5694,
+      "priced": 11223,
       "examples_missing": [
         "Souvenir AK-47 | AUTOEXEC (Factory New)",
         "Souvenir AK-47 | AUTOEXEC (Minimal Wear)",
@@ -56,8 +56,8 @@
     },
     "Caixas e cápsulas": {
       "checked": 481,
-      "missing": 44,
-      "priced": 437,
+      "missing": 43,
+      "priced": 438,
       "examples_missing": [
         "Pallet of Presents",
         "Audience Participation Parcel",
@@ -68,12 +68,12 @@
         "ESL One Cologne 2014 Overpass Souvenir Package",
         "DreamHack 2014 Dust II Souvenir Package",
         "DreamHack 2014 Inferno Souvenir Package",
-        "DreamHack 2014 Mirage Souvenir Package",
         "DreamHack 2014 Nuke Souvenir Package",
         "DreamHack 2014 Cache Souvenir Package",
         "DreamHack 2014 Cobblestone Souvenir Package",
         "Cologne 2026 Sticker Capsule",
-        "ESL One Katowice 2015 Mirage Souvenir Package"
+        "ESL One Katowice 2015 Mirage Souvenir Package",
+        "ESL One Katowice 2015 Nuke Souvenir Package"
       ]
     },
     "Chaveiros": {
@@ -84,8 +84,8 @@
     },
     "Facas": {
       "checked": 4020,
-      "missing": 429,
-      "priced": 3591,
+      "missing": 426,
+      "priced": 3594,
       "examples_missing": [
         "★ StatTrak™ Bayonet | Freehand (Well-Worn)",
         "★ StatTrak™ Bayonet | Freehand (Battle-Scarred)",
