@@ -35,6 +35,10 @@ jobs:
           retention-days: 1
       - name: Install signing dependency
         run: python -m pip install 'cryptography>=43,<47'
+      - name: Test exact CS2 screenshot intake (synthetic fixtures only)
+        run: |
+          python -m pip install Pillow
+          python -m unittest discover -s tests -p test_exact_cs2_capture.py -v
       - name: Query UUSKINS market data (read-only)
         env:
           UUSKINS_APP_KEY: ${{ secrets.UUSKINS_APP_KEY }}
