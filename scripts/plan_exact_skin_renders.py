@@ -29,11 +29,11 @@ def plan_item(item, provider):
     if provider == "inspekt":
         result["provider_request_preview"] = (
             "https://inspekt.gg/api/still?inspect=" + quote(link, safe="")
-            + "&view=front&bg=rarity&w=640&h=400&key=REQUIRES_USER_API_KEY"
+            + "&view=front&bg=rarity&w=640&h=400&key=REQUIRES_PUBLISHABLE_KEY"
         )
     else:
         result["provider_request_preview"] = (
-            "SteamDT /open/cs2/v1/inspect (authentication and exact request format must be verified)"
+            "SteamDT API request format and authorization not yet validated"
         )
     return result
 
@@ -50,7 +50,7 @@ def main():
         "schema_version": 1, "provider": provider, "dry_run": True,
         "network_requests_sent": 0, "rendered_images": 0,
         "currency": "unverified", "checkout_enabled": False,
-        "notes": "Provider authorization, pricing, quotas and image correctness require separate validation.",
+        "notes": "Inspekt requires registered origin and publishable key; trial is 10 days and stored images expire after 24 hours unless otherwise agreed. Provider authorization, pricing, quotas and image correctness require separate validation.",
         "listings": records,
     }
     OUTPUT.write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding="utf-8")
