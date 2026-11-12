@@ -67,6 +67,14 @@ jobs:
           retention-days: 3
       - name: Build sanitized staging listing feed
         run: python scripts/build_uuskins_feed.py
+      - name: Plan exact listing image requests (dry run, no API charges)
+        run: python scripts/plan_exact_skin_renders.py
+      - name: Upload exact image render plan (no rendered images)
+        uses: actions/upload-artifact@v4
+        with:
+          name: uuskins-exact-render-plan-dry-run
+          path: exact-render-plan-staging.json
+          retention-days: 3
       - name: Validate staging feed integrity
         run: python scripts/validate_uuskins_feed.py
       - name: Build explicitly labeled BRL simulation (USD assumption only)
