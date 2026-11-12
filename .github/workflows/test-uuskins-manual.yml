@@ -53,6 +53,14 @@ jobs:
           name: uuskins-image-source-audit
           path: uuskins-image-source-audit.json
           retention-days: 3
+      - name: Prepare exact Redline inspect render candidate (no paid API)
+        run: python scripts/prepare_redline_render_candidate.py
+      - name: Upload exact Redline render input (private workflow artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: uuskins-redline-render-candidate
+          path: uuskins-redline-render-candidate.json
+          retention-days: 3
       - name: Build sanitized staging listing feed
         run: python scripts/build_uuskins_feed.py
       - name: Validate staging feed integrity
