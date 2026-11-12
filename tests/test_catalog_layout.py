@@ -16,6 +16,8 @@ class CatalogLayoutTests(unittest.TestCase):
     def test_art_is_centered_and_no_vertical_offset(self):
         self.assertIn("object-position:center bottom", HTML)
         self.assertIn(".catalog-results .item.rarity-item .art{margin:0;width:100%", HTML)
+        self.assertNotIn(".catalog-results .item h3{min-height:62px}", HTML)
+        self.assertNotIn(".catalog-results .item .market-price{min-height:60px}", HTML)
         self.assertNotIn("transform:none;margin:auto;padding:9px", HTML)
 
     def test_local_preview_loads_published_price_files(self):
