@@ -203,7 +203,7 @@ function priceMarkup(x){
   const reason=!(fxCnyBrl>0)?"Cotação indisponível · consultar valor no atendimento":(!priceMap?"Preços temporariamente indisponíveis · consultar atendimento":"Sem preço de referência · consultar atendimento");
   return '<div class="market-price"><small>'+reason+'</small><small style="display:block;color:#f6b76c;margin-top:5px">Atenção: item possivelmente com baixa liquidez.</small></div>';
  }
- return '<div class="market-price"><strong>'+brl(amount)+'</strong><small>'+(fxStale?'Cotação desatualizada · confirmar antes da compra':'')+'</small></div>';
+ return '<div class="market-price"><strong>'+brl(amount)+'</strong>'+(fxStale?'<small>Cotação desatualizada · confirmar antes da compra</small>':'')+'</div>';
 }
 function paintPrices(){
  document.querySelectorAll("#grid .item[data-id]").forEach(el=>{
