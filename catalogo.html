@@ -148,7 +148,9 @@ function rarityColor(x){
  return "";
 }
 function categoryLabel(c){return c==="Outros itens"?"Passe de Major":c;}
-const PREVIEW_LOCAL=location.protocol==="file:";\nconst PREVIEW_DATA_BASE="https://raw.githubusercontent.com/salamito689/salamito-skins/main/";\nconst PRICE_URL=PREVIEW_LOCAL?PREVIEW_DATA_BASE+"prices.json":"prices.json";
+const PREVIEW_LOCAL=location.protocol==="file:";
+const PREVIEW_DATA_BASE="https://raw.githubusercontent.com/salamito689/salamito-skins/main/";
+const PRICE_URL=PREVIEW_LOCAL?PREVIEW_DATA_BASE+"prices.json":"prices.json";
 const FX_URL="https://open.er-api.com/v6/latest/CNY";
 let priceMap=null,phasePriceMap=null,fxCnyBrl=null,fxSource="",fxTimestamp=null,priceTimestamp=null,priceError="",fxStale=false;
 const FX_CACHE_KEY="salamito-last-valid-cny-brl-v1";
