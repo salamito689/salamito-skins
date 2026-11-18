@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-11-18T03:29:32.420245+00:00",
+  "generated_at": "2026-11-18T12:10:31.818105+00:00",
   "note": "Diagnostic based on exact catalog names; categories are approximate and may include items hidden in storefront. Missing does not mean unavailable on YouPin.",
-  "total_checked": 47529,
-  "total_missing": 22374,
+  "total_checked": 50338,
+  "total_missing": 24151,
   "categories": {
     "Adesivos": {
-      "checked": 22268,
-      "missing": 13348,
+      "checked": 23814,
+      "missing": 14894,
       "priced": 8920,
       "examples_missing": [
         "Sticker | Shooter",
@@ -34,8 +34,8 @@
     },
     "Armas e skins": {
       "checked": 16917,
-      "missing": 5695,
-      "priced": 11222,
+      "missing": 5707,
+      "priced": 11210,
       "examples_missing": [
         "Souvenir AK-47 | AUTOEXEC (Factory New)",
         "Souvenir AK-47 | AUTOEXEC (Minimal Wear)",
@@ -55,9 +55,9 @@
       ]
     },
     "Caixas e cápsulas": {
-      "checked": 481,
-      "missing": 45,
-      "priced": 436,
+      "checked": 485,
+      "missing": 48,
+      "priced": 437,
       "examples_missing": [
         "Pallet of Presents",
         "Audience Participation Parcel",
@@ -83,30 +83,30 @@
       "examples_missing": []
     },
     "Facas": {
-      "checked": 4020,
-      "missing": 412,
-      "priced": 3608,
+      "checked": 5220,
+      "missing": 569,
+      "priced": 4651,
       "examples_missing": [
         "★ StatTrak™ Bayonet | Freehand (Well-Worn)",
         "★ StatTrak™ Bayonet | Freehand (Battle-Scarred)",
         "★ StatTrak™ Bayonet | Slaughter (Field-Tested)",
         "★ StatTrak™ Bayonet | Blue Steel (Factory New)",
         "★ StatTrak™ Bayonet | Blue Steel (Field-Tested)",
+        "★ StatTrak™ Bayonet | Blue Steel (Factory New)",
+        "★ StatTrak™ Bayonet | Blue Steel (Field-Tested)",
         "★ StatTrak™ Bayonet | Damascus Steel (Well-Worn)",
         "★ StatTrak™ Bayonet | Damascus Steel (Battle-Scarred)",
+        "★ StatTrak™ Bayonet | Case Hardened (Factory New)",
         "★ StatTrak™ Bayonet | Case Hardened (Factory New)",
         "★ StatTrak™ Bayonet | Lore (Well-Worn)",
         "★ StatTrak™ Bayonet | Autotronic (Factory New)",
         "★ Bayonet | Forest DDPAT (Factory New)",
-        "★ StatTrak™ Bayonet | Forest DDPAT (Factory New)",
-        "★ StatTrak™ Bayonet | Forest DDPAT (Well-Worn)",
-        "★ StatTrak™ Bayonet | Boreal Forest (Factory New)",
-        "★ StatTrak™ Bayonet | Boreal Forest (Well-Worn)"
+        "★ StatTrak™ Bayonet | Forest DDPAT (Factory New)"
       ]
     },
     "Grafites": {
-      "checked": 2111,
-      "missing": 2111,
+      "checked": 2144,
+      "missing": 2144,
       "priced": 0,
       "examples_missing": [
         "Sealed Graffiti | Blood Boiler",
@@ -127,8 +127,8 @@
       ]
     },
     "Kits de música": {
-      "checked": 191,
-      "missing": 20,
+      "checked": 207,
+      "missing": 36,
       "priced": 171,
       "examples_missing": [
         "Valve, Counter-Strike 2",
@@ -158,8 +158,8 @@
       ]
     },
     "Outros": {
-      "checked": 818,
-      "missing": 741,
+      "checked": 828,
+      "missing": 751,
       "priced": 77,
       "examples_missing": [
         "5 Year Veteran Coin",
