@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-11-21T04:02:08.198076+00:00",
+  "generated_at": "2026-11-21T12:32:14.060252+00:00",
   "note": "Diagnostic based on exact catalog names; categories are approximate and may include items hidden in storefront. Missing does not mean unavailable on YouPin.",
   "total_checked": 50338,
-  "total_missing": 24133,
+  "total_missing": 24131,
   "categories": {
     "Adesivos": {
       "checked": 23814,
@@ -34,8 +34,8 @@
     },
     "Armas e skins": {
       "checked": 16917,
-      "missing": 5701,
-      "priced": 11216,
+      "missing": 5700,
+      "priced": 11217,
       "examples_missing": [
         "Souvenir AK-47 | AUTOEXEC (Factory New)",
         "Souvenir AK-47 | AUTOEXEC (Minimal Wear)",
@@ -84,8 +84,8 @@
     },
     "Facas": {
       "checked": 5220,
-      "missing": 558,
-      "priced": 4662,
+      "missing": 557,
+      "priced": 4663,
       "examples_missing": [
         "★ StatTrak™ Bayonet | Freehand (Well-Worn)",
         "★ StatTrak™ Bayonet | Freehand (Battle-Scarred)",
